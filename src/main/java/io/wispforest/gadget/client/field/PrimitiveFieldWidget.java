@@ -11,9 +11,9 @@ import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 public class PrimitiveFieldWidget extends FlowLayout {
@@ -31,10 +31,10 @@ public class PrimitiveFieldWidget extends FlowLayout {
         this.fieldPath = fieldPath;
 
         this.contentsLabel = Components.label(
-            Text.literal(pfo.contents())
-                .formatted(Formatting.GRAY)
+            Component.literal(pfo.contents())
+                .withStyle(ChatFormatting.GRAY)
         );
-        this.editLabel = Components.label(Text.literal(" ✎ "));
+        this.editLabel = Components.label(Component.literal(" ✎ "));
         this.editField = new TabTextBoxComponent(Sizing.fixed(100));
         this.editData = pfo.editData().orElseThrow();
 
@@ -48,11 +48,11 @@ public class PrimitiveFieldWidget extends FlowLayout {
         child(editLabel);
     }
 
-    private boolean editFieldKeyPressed(KeyInput input) {
+    private boolean editFieldKeyPressed(KeyEvent input) {
         if (input.key() == GLFW.GLFW_KEY_ENTER) {
             UISounds.playButtonSound();
 
-            island.source().setPrimitiveAt(fieldPath, new PrimitiveEditData(editData.type(), editField.getText()));
+            island.source().setPrimitiveAt(fieldPath, new PrimitiveEditData(editData.type(), editField.getValue()));
 
             removeChild(editField);
 
@@ -76,8 +76,8 @@ public class PrimitiveFieldWidget extends FlowLayout {
         removeChild(editLabel);
 
         child(editField);
-        editField.setText(editData.data());
-        editField.setCursorToStart(false);
+        editField.setValue(editData.data());
+        editField.moveCursorToStart(false);
 
         if (focusHandler() != null)
             focusHandler().focus(editField, FocusSource.MOUSE_CLICK);

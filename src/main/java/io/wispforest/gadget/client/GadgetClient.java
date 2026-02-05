@@ -37,30 +37,29 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
 public class GadgetClient implements ClientModInitializer {
-    public static final KeyBinding INSPECT_KEY = new KeyBinding("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyBinding.Category.MISC);
-    public static final KeyBinding DUMP_KEY = new KeyBinding("key.gadget.dump", GLFW.GLFW_KEY_K, KeyBinding.Category.MISC);
+    public static final KeyMapping INSPECT_KEY = new KeyMapping("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyMapping.Category.MISC);
+    public static final KeyMapping DUMP_KEY = new KeyMapping("key.gadget.dump", GLFW.GLFW_KEY_K, KeyMapping.Category.MISC);
 
     @Override
     public void onInitializeClient() {
@@ -84,7 +83,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(FieldDataResponseS2CPacket.class, (packet, access) -> {
-            if (access.runtime().currentScreen instanceof FieldDataScreen gui
+            if (access.runtime().screen instanceof FieldDataScreen gui
                 && gui.target().equals(packet.target())
                 && gui.dataSource() instanceof RemoteFieldDataSource remote) {
                 remote.acceptPacket(packet);
@@ -92,7 +91,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(FieldDataErrorS2CPacket.class, (packet, access) -> {
-            if (access.runtime().currentScreen instanceof FieldDataScreen gui
+            if (access.runtime().screen instanceof FieldDataScreen gui
                 && gui.target().equals(packet.target())
                 && gui.dataSource() instanceof RemoteFieldDataSource remote) {
                 remote.acceptPacket(packet);
@@ -100,7 +99,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(ResourceListS2CPacket.class, (packet, access) -> {
-            var screen = new ViewResourcesScreen(access.runtime().currentScreen, packet.resources());
+            var screen = new ViewResourcesScreen(access.runtime().screen, packet.resources());
 
             screen.resRequester(
                 (id, idx) -> GadgetNetworking.CHANNEL.clientHandle().send(new RequestResourceC2SPacket(id, idx)));
@@ -109,7 +108,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(ResourceDataS2CPacket.class, (packet, access) -> {
-            if (!(access.runtime().currentScreen instanceof ViewResourcesScreen screen))
+            if (!(access.runtime().screen instanceof ViewResourcesScreen screen))
                 return;
 
             screen.openFile(packet.id(), () -> new ByteArrayInputStream(packet.data()));
@@ -122,18 +121,18 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (!INSPECT_KEY.wasPressed()) return;
+            if (!INSPECT_KEY.consumeClick()) return;
 
             InspectionTarget target;
 
-            if (!client.options.getPerspective().isFirstPerson()
+            if (!client.options.getCameraType().isFirstPerson()
              && client.player != null) {
                 target = new EntityTarget(client.player.getId());
             } else {
                 Entity camera = client.getCameraEntity();
                 if (camera == null) camera = client.player;
 
-                HitResult hitResult = raycast(camera, client.getRenderTickCounter().getTickProgress(false));
+                HitResult hitResult = raycast(camera, client.getDeltaTracker().getGameTimeDeltaPartialTick(false));
 
                 if (hitResult == null) return;
 
@@ -142,15 +141,15 @@ public class GadgetClient implements ClientModInitializer {
                 } else {
                     BlockPos blockPos = hitResult instanceof BlockHitResult blockHitResult
                         ? blockHitResult.getBlockPos()
-                        : BlockPos.ofFloored(hitResult.getPos());
+                        : BlockPos.containing(hitResult.getLocation());
 
                     target = new BlockEntityTarget(blockPos);
                 }
             }
 
             if (!GadgetNetworking.CHANNEL.canSendToServer()) {
-                if (target.resolve(client.world) == null) {
-                    client.player.sendMessage(Text.translatable("message.gadget.fail.notfound"), true);
+                if (target.resolve(client.level) == null) {
+                    client.player.displayClientMessage(Component.translatable("message.gadget.fail.notfound"), true);
                     return;
                 }
 
@@ -167,7 +166,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (!DUMP_KEY.wasPressed()) return;
+            if (!DUMP_KEY.consumeClick()) return;
 
             if (ClientPacketDumper.isDumping()) {
                 ClientPacketDumper.stop();
@@ -187,33 +186,33 @@ public class GadgetClient implements ClientModInitializer {
 
             instance.adapter.rootComponent.child(
                 Components.button(
-                    Text.translatable("text.gadget.menu_button"),
-                    button -> MinecraftClient.getInstance().setScreen(new GadgetScreen(instance.screen))
-                ).<ButtonWidget>configure(button -> {
+                    Component.translatable("text.gadget.menu_button"),
+                    button -> Minecraft.getInstance().setScreen(new GadgetScreen(instance.screen))
+                ).<Button>configure(button -> {
                     button.margins(Insets.left(4)).sizing(Sizing.fixed(20));
                     instance.alignComponentToWidget(widget -> {
-                        if (!(widget instanceof ButtonWidget daButton)) return false;
-                        return daButton.getMessage().getContent() instanceof TranslatableTextContent translatable
+                        if (!(widget instanceof Button daButton)) return false;
+                        return daButton.getMessage().getContents() instanceof TranslatableContents translatable
                             && alignToButtons.contains(translatable.getKey());
                     }, Layer.Instance.AnchorSide.RIGHT, 0, button);
                 })
             );
-        }, TitleScreen.class, GameMenuScreen.class);
+        }, TitleScreen.class, PauseScreen.class);
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            if (screen instanceof HandledScreen<?> handled)
+            if (screen instanceof AbstractContainerScreen<?> handled)
                 ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, input) -> {
-                    if (!INSPECT_KEY.matchesKey(input)) return true;
+                    if (!INSPECT_KEY.matches(input)) return true;
 
-                    double mouseX = client.mouse.getX()
-                        * (double)client.getWindow().getScaledWidth() / (double)client.getWindow().getWidth();
-                    double mouseY = client.mouse.getY()
-                        * (double)client.getWindow().getScaledHeight() / (double)client.getWindow().getHeight();
+                    double mouseX = client.mouseHandler.xpos()
+                        * (double)client.getWindow().getGuiScaledWidth() / (double)client.getWindow().getScreenWidth();
+                    double mouseY = client.mouseHandler.ypos()
+                        * (double)client.getWindow().getGuiScaledHeight() / (double)client.getWindow().getScreenHeight();
                     var slot = ((HandledScreenAccessor) handled).callGetSlotAt(mouseX, mouseY);
 
                     if (slot == null) return true;
-                    if (slot instanceof CreativeInventoryScreen.LockableSlot) return true;
-                    if (slot.getStack().isEmpty()) return true;
+                    if (slot instanceof CreativeModeInventoryScreen.CustomCreativeSlot) return true;
+                    if (slot.getItem().isEmpty()) return true;
 
                     client.setScreen(new StackComponentDataScreen(handled, slot));
 
@@ -239,19 +238,19 @@ public class GadgetClient implements ClientModInitializer {
     // 100% not stolen from owo-whats-this
     // https://github.com/wisp-forest/owo-whats-this/blob/master/src/main/java/io/wispforest/owowhatsthis/OwoWhatsThis.java#L155-L171.
     public static HitResult raycast(Entity entity, float tickDelta) {
-        var blockTarget = entity.raycast(5, tickDelta, false);
+        var blockTarget = entity.pick(5, tickDelta, false);
 
-        var maxReach = entity.getRotationVec(tickDelta).multiply(5);
-        var entityTarget = ProjectileUtil.raycast(
+        var maxReach = entity.getViewVector(tickDelta).scale(5);
+        var entityTarget = ProjectileUtil.getEntityHitResult(
             entity,
-            entity.getEyePos(),
-            entity.getEyePos().add(maxReach),
-            entity.getBoundingBox().stretch(maxReach),
+            entity.getEyePosition(),
+            entity.getEyePosition().add(maxReach),
+            entity.getBoundingBox().expandTowards(maxReach),
             candidate -> true,
             5 * 5
         );
 
-        return entityTarget != null && entityTarget.squaredDistanceTo(entity) < blockTarget.squaredDistanceTo(entity)
+        return entityTarget != null && entityTarget.distanceTo(entity) < blockTarget.distanceTo(entity)
             ? entityTarget
             : blockTarget;
     }

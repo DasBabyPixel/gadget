@@ -5,16 +5,15 @@ import com.google.common.collect.HashBiMap;
 import io.wispforest.endec.Endec;
 import io.wispforest.gadget.util.PrettyPrinters;
 import io.wispforest.gadget.util.ReflectionUtil;
-import net.minecraft.block.Block;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public record SimpleMapPathStepType(Function<String, Object> fromImpl, Function<Object, String> toImpl) implements MapPathStepType {
     private static final BiMap<String, SimpleMapPathStepType> REGISTRY = HashBiMap.create();
@@ -31,7 +30,7 @@ public record SimpleMapPathStepType(Function<String, Object> fromImpl, Function<
     }
 
     private static <T> void registerForRegistry(Class<T> klass, Registry<T> registry) {
-        register(registry.getKey().getValue().toString(), klass, x -> registry.get(Identifier.of(x)), x -> registry.getId(x).toString());
+        register(registry.key().location().toString(), klass, x -> registry.getValue(ResourceLocation.parse(x)), x -> registry.getKey(x).toString());
     }
 
     public static SimpleMapPathStepType getFor(Class<?> klass) {
@@ -41,11 +40,11 @@ public record SimpleMapPathStepType(Function<String, Object> fromImpl, Function<
     static {
         register("int", Integer.class, Integer::parseInt, Object::toString);
         register("string", String.class, x -> x, String::toString);
-        register("identifier", Identifier.class, Identifier::of, Identifier::toString);
+        register("identifier", ResourceLocation.class, ResourceLocation::parse, ResourceLocation::toString);
 
-        registerForRegistry(Block.class, Registries.BLOCK);
-        registerForRegistry(Item.class, Registries.ITEM);
-        registerForRegistry(StatusEffect.class, Registries.STATUS_EFFECT);
+        registerForRegistry(Block.class, BuiltInRegistries.BLOCK);
+        registerForRegistry(Item.class, BuiltInRegistries.ITEM);
+        registerForRegistry(MobEffect.class, BuiltInRegistries.MOB_EFFECT);
     }
 
     @Override

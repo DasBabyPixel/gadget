@@ -2,11 +2,11 @@ package io.wispforest.gadget.dump.fake;
 
 import io.netty.buffer.ByteBuf;
 import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.listener.PacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.PacketType;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public interface FakeGadgetPacket extends Packet<PacketListener> {
     int id();
 
-    PacketCodec<? super PacketByteBuf, ? extends FakeGadgetPacket> codec();
+    StreamCodec<? super FriendlyByteBuf, ? extends FakeGadgetPacket> codec();
 
     default Packet<?> unwrapVanilla() {
         return this;
@@ -31,12 +31,12 @@ public interface FakeGadgetPacket extends Packet<PacketListener> {
 
     // region vanilla stubs
     @Override
-    default void apply(PacketListener listener) {
+    default void handle(PacketListener listener) {
         throw new IllegalStateException();
     }
 
     @Override
-    default PacketType<? extends Packet<PacketListener>> getPacketType() {
+    default PacketType<? extends Packet<PacketListener>> type() {
         throw new IllegalStateException();
     }
     // endregion

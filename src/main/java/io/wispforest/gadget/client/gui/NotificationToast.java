@@ -4,19 +4,19 @@ import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastManager;
+import net.minecraft.network.chat.Component;
 
 public class NotificationToast implements Toast {
     private final OwoUIAdapter<FlowLayout> adapter;
-    private final MinecraftClient client = MinecraftClient.getInstance();
+    private final Minecraft client = Minecraft.getInstance();
     private Visibility visibility = Visibility.SHOW;
 
-    public NotificationToast(Text headText, Text messageText) {
+    public NotificationToast(Component headText, Component messageText) {
         this.adapter = OwoUIAdapter.createWithoutScreen(0, 0, 160, 32, Containers::verticalFlow);
 
         var root = this.adapter.rootComponent;
@@ -40,17 +40,17 @@ public class NotificationToast implements Toast {
     }
 
     public void register() {
-        if (!client.isOnThread()) {
+        if (!client.isSameThread()) {
             client.execute(this::register);
             return;
         }
 
-        client.getToastManager().add(this);
+        client.getToastManager().addToast(this);
     }
 
     @Override
-    public void draw(DrawContext ctx, TextRenderer textRenderer, long startTime) {
-        this.adapter.render(ctx, 0, 0, client.getRenderTickCounter().getTickProgress(false));
+    public void render(GuiGraphics ctx, Font textRenderer, long startTime) {
+        this.adapter.render(ctx, 0, 0, client.getDeltaTracker().getGameTimeDeltaPartialTick(false));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class NotificationToast implements Toast {
     }
 
     @Override
-    public Visibility getVisibility() {
+    public Visibility getWantedVisibility() {
         return visibility;
     }
 }

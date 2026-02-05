@@ -2,8 +2,8 @@ package io.wispforest.gadget.client.gui.inspector;
 
 import io.wispforest.gadget.mixin.client.EntryListWidgetAccessor;
 import io.wispforest.gadget.mixin.client.EntryListWidgetEntryAccessor;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.EntryListWidget;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.components.AbstractWidget;
 
 public final class VanillaSupport {
     private VanillaSupport() {
@@ -13,21 +13,21 @@ public final class VanillaSupport {
     public static void init() {
         ElementUtils.registerRootLister((screen, list) -> list.add(screen));
 
-        ElementUtils.registerElementSupport(ClickableWidget.class, ElementSupport.fromLambda(
-            ClickableWidget::getX,
-            ClickableWidget::getY,
-            ClickableWidget::getWidth,
-            ClickableWidget::getHeight
+        ElementUtils.registerElementSupport(AbstractWidget.class, ElementSupport.fromLambda(
+            AbstractWidget::getX,
+            AbstractWidget::getY,
+            AbstractWidget::getWidth,
+            AbstractWidget::getHeight
         ));
 
         ElementUtils.registerElementSupport(EntryListWidgetAccessor.class, ElementSupport.fromLambda(
-            w -> ((ClickableWidget) w).getX(),
-            w -> ((ClickableWidget) w).getY(),
-            w -> ((ClickableWidget) w).getWidth(),
-            w -> ((ClickableWidget) w).getHeight()
+            w -> ((AbstractWidget) w).getX(),
+            w -> ((AbstractWidget) w).getY(),
+            w -> ((AbstractWidget) w).getWidth(),
+            w -> ((AbstractWidget) w).getHeight()
         ));
 
-        ElementUtils.registerElementSupport(EntryListWidget.Entry.class, ElementSupport.fromLambda(
+        ElementUtils.registerElementSupport(AbstractSelectionList.Entry.class, ElementSupport.fromLambda(
             w -> {
                 var list = ((EntryListWidgetEntryAccessor) w).getParentList();
                 return list.getRowLeft();

@@ -8,36 +8,36 @@ import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Function;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 
 public class PrimitiveEditorWidget extends FlowLayout {
     private final NbtDataIsland island;
     private final NbtPath path;
     private final Object value;
-    private final Function<String, NbtElement> parser;
+    private final Function<String, Tag> parser;
 
     private final LabelComponent contentsLabel;
     private final LabelComponent editLabel;
     private final TextBoxComponent editField;
 
-    protected PrimitiveEditorWidget(NbtDataIsland island, NbtPath path, Object value, Function<String, NbtElement> parser) {
+    protected PrimitiveEditorWidget(NbtDataIsland island, NbtPath path, Object value, Function<String, Tag> parser) {
         super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
         this.island = island;
         this.path = path;
 
         this.contentsLabel = Components.label(
-            Text.literal(value.toString())
-                .formatted(Formatting.GRAY)
+            Component.literal(value.toString())
+                .withStyle(ChatFormatting.GRAY)
         );
         this.value = value;
         this.parser = parser;
-        this.editLabel = Components.label(Text.literal(" ✎ "));
+        this.editLabel = Components.label(Component.literal(" ✎ "));
         this.editField = new TabTextBoxComponent(Sizing.fixed(100));
 
         GuiUtil.semiButton(this.editLabel, this::startEditing);
@@ -50,11 +50,11 @@ public class PrimitiveEditorWidget extends FlowLayout {
         child(editLabel);
     }
 
-    private boolean editFieldKeyPressed(KeyInput input) {
+    private boolean editFieldKeyPressed(KeyEvent input) {
         if (input.key() == GLFW.GLFW_KEY_ENTER) {
             UISounds.playButtonSound();
 
-            path.set(island.data, parser.apply(editField.getText()));
+            path.set(island.data, parser.apply(editField.getValue()));
 
             island.reloadPath(path);
             island.reloader.accept(island.data);
@@ -81,8 +81,8 @@ public class PrimitiveEditorWidget extends FlowLayout {
         removeChild(editLabel);
 
         child(editField);
-        editField.setText(value.toString());
-        editField.setCursorToStart(false);
+        editField.setValue(value.toString());
+        editField.moveCursorToStart(false);
 
         if (focusHandler() != null)
             focusHandler().focus(editField, FocusSource.MOUSE_CLICK);

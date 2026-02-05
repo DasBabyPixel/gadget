@@ -5,12 +5,12 @@ import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import io.wispforest.gadget.client.dump.DumpPrimer;
 import io.wispforest.gadget.client.gui.ContextMenuScreens;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerServerListWidget;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,52 +21,52 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.net.UnknownHostException;
 
-@Mixin(MultiplayerServerListWidget.ServerEntry.class)
+@Mixin(ServerSelectionList.OnlineServerEntry.class)
 public abstract class MultiplayerServerEntryMixin {
-    @Shadow @Final private MultiplayerScreen screen;
+    @Shadow @Final private JoinMultiplayerScreen screen;
 
-    @Shadow @Final private ServerInfo server;
+    @Shadow @Final private ServerData server;
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow @Final private Minecraft client;
 
     @Shadow public abstract void saveFile();
 
     @Shadow protected abstract void update();
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void onRightClick(Click click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
+    private void onRightClick(MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
         if (click.button() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
         if (!Gadget.CONFIG.rightClickDump()) return;
 
         ContextMenuScreens.contextMenuAt(screen, click.x(), click.y())
-            .button(Text.translatable("text.gadget.join_with_dump"), dropdown2 -> {
+            .button(Component.translatable("text.gadget.join_with_dump"), dropdown2 -> {
                 DumpPrimer.isPrimed = true;
 
-                this.screen.connect(server);
+                this.screen.join(server);
             })
-            .button(Text.translatable("text.gadget.query_with_dump"), dropdown2 -> {
+            .button(Component.translatable("text.gadget.query_with_dump"), dropdown2 -> {
                 ClientPacketDumper.start(false);
 
                 try {
-                    this.screen.getServerListPinger().add(
+                    this.screen.getPinger().pingServer(
                         this.server,
                         () -> this.client.execute(this::saveFile),
                         () -> {
                             this.server
-                                .setStatus(
-                                    this.server.protocolVersion == SharedConstants.getGameVersion().protocolVersion()
-                                        ? ServerInfo.Status.SUCCESSFUL
-                                        : ServerInfo.Status.INCOMPATIBLE
+                                .setState(
+                                    this.server.protocol == SharedConstants.getCurrentVersion().protocolVersion()
+                                        ? ServerData.State.SUCCESSFUL
+                                        : ServerData.State.INCOMPATIBLE
                                 );
                             this.client.execute(this::update);
                         }
                     );
                 } catch (UnknownHostException var2x) {
                     this.server.ping = -1L;
-                    this.server.label = MultiplayerServerListWidgetAccessor.getCANNOT_RESOLVE_TEXT();
+                    this.server.motd = MultiplayerServerListWidgetAccessor.getCANNOT_RESOLVE_TEXT();
                 } catch (Exception var3x) {
                     this.server.ping = -1L;
-                    this.server.label = MultiplayerServerListWidgetAccessor.getCANNOT_CONNECT_TEXT();
+                    this.server.motd = MultiplayerServerListWidgetAccessor.getCANNOT_CONNECT_TEXT();
                 }
             });
 

@@ -7,10 +7,6 @@ import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +14,10 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class OwoSupport {
@@ -44,8 +44,8 @@ public final class OwoSupport {
         PacketUnwrapper.EVENT.register((packet, errSink) -> {
             if (!(packet.customPayload() instanceof ParticleSystemPayloadAccessor payload)) return null;
 
-            ParticleSystemController controller = ParticleSystemController.REGISTERED_CONTROLLERS.get(payload.getId().id());
-            Vec3d pos = payload.getPos();
+            ParticleSystemController controller = ParticleSystemController.REGISTERED_CONTROLLERS.get(payload.type().id());
+            Vec3 pos = payload.getPos();
             ParticleSystemInstanceAccessor<?> instance;
 
             try {
@@ -72,21 +72,21 @@ public final class OwoSupport {
         });
     }
 
-    private static void drawHandshakeMap(Map<Identifier, Integer> data, Text prefix, Consumer<Text> out) {
+    private static void drawHandshakeMap(Map<ResourceLocation, Integer> data, Component prefix, Consumer<Component> out) {
         for (var entry : data.entrySet()) {
-            out.accept(Text.literal("")
+            out.accept(Component.literal("")
                 .append(prefix)
-                .append(Text.literal(entry.getKey().toString())
-                    .formatted(Formatting.WHITE))
-                .append(Text.literal(" = " + entry.getValue())
-                    .formatted(Formatting.GRAY)));
+                .append(Component.literal(entry.getKey().toString())
+                    .withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(" = " + entry.getValue())
+                    .withStyle(ChatFormatting.GRAY)));
         }
     }
 
-    public record ParticleSystemPacket(ParticleSystemController controller, int systemId, Vec3d pos, Object data) implements FieldsUnwrappedPacket {
+    public record ParticleSystemPacket(ParticleSystemController controller, int systemId, Vec3 pos, Object data) implements FieldsUnwrappedPacket {
         @Override
-        public Text headText() {
-            return Text.translatable("text.gadget.particle_system", systemId, (int) pos.x, (int) pos.y, (int) pos.z);
+        public Component headText() {
+            return Component.translatable("text.gadget.particle_system", systemId, (int) pos.x, (int) pos.y, (int) pos.z);
         }
 
         @Override
@@ -109,19 +109,19 @@ public final class OwoSupport {
 
     public record HandshakeRequest(OwoHandshake.HandshakeRequest req) implements LinesUnwrappedPacket {
         @Override
-        public void render(Consumer<Text> out, ErrorSink errSink) {
-            drawHandshakeMap(req.optionalChannels(), Text.literal("o ").formatted(Formatting.AQUA), out);
+        public void render(Consumer<Component> out, ErrorSink errSink) {
+            drawHandshakeMap(req.optionalChannels(), Component.literal("o ").withStyle(ChatFormatting.AQUA), out);
         }
     }
 
-    public record HandshakeResponse(Map<Identifier, Integer> requiredChannels,
-                                    Map<Identifier, Integer> requiredControllers,
-                                    Map<Identifier, Integer> optionalChannels) implements LinesUnwrappedPacket {
+    public record HandshakeResponse(Map<ResourceLocation, Integer> requiredChannels,
+                                    Map<ResourceLocation, Integer> requiredControllers,
+                                    Map<ResourceLocation, Integer> optionalChannels) implements LinesUnwrappedPacket {
         @Override
-        public void render(Consumer<Text> out, ErrorSink errSink) {
-            drawHandshakeMap(requiredChannels, Text.literal("r ").formatted(Formatting.RED), out);
-            drawHandshakeMap(requiredControllers, Text.literal("p ").formatted(Formatting.GREEN), out);
-            drawHandshakeMap(optionalChannels, Text.literal("o ").formatted(Formatting.AQUA), out);
+        public void render(Consumer<Component> out, ErrorSink errSink) {
+            drawHandshakeMap(requiredChannels, Component.literal("r ").withStyle(ChatFormatting.RED), out);
+            drawHandshakeMap(requiredControllers, Component.literal("p ").withStyle(ChatFormatting.GREEN), out);
+            drawHandshakeMap(optionalChannels, Component.literal("o ").withStyle(ChatFormatting.AQUA), out);
         }
     }
 }

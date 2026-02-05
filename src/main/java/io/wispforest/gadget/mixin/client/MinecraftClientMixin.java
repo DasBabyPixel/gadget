@@ -5,8 +5,8 @@ import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import io.wispforest.gadget.client.MatrixStackLogger;
 import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import io.wispforest.gadget.client.dump.DumpPrimer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public class MinecraftClientMixin {
     @Shadow private volatile boolean paused;
 

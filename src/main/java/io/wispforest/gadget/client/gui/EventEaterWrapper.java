@@ -4,7 +4,7 @@ import io.wispforest.owo.ui.container.WrappingParentComponent;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.MouseButtonEvent;
 
 /**
  * Eats events. Yum!
@@ -19,12 +19,12 @@ public class EventEaterWrapper<C extends Component> extends WrappingParentCompon
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         return super.onMouseDown(click, doubled) || isInBoundingBox(click.x(), click.y());
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
+    public boolean onMouseUp(MouseButtonEvent click) {
         return super.onMouseUp(click) || isInBoundingBox(click.x(), click.y());
     }
 

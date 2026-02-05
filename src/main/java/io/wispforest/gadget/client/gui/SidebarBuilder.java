@@ -6,7 +6,7 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -24,10 +24,10 @@ public class SidebarBuilder {
     }
 
     public void button(String translationKeyBase, OnPressHandler handler) {
-        button(Text.translatable(translationKeyBase), Text.translatable(translationKeyBase + ".tooltip"), handler);
+        button(Component.translatable(translationKeyBase), Component.translatable(translationKeyBase + ".tooltip"), handler);
     }
 
-    public void button(Text icon, @Nullable Text tooltip, OnPressHandler handler) {
+    public void button(Component icon, @Nullable Component tooltip, OnPressHandler handler) {
         Button button = new Button(icon, tooltip);
 
         button.mouseDown().subscribe((click, doubled) -> {
@@ -46,7 +46,7 @@ public class SidebarBuilder {
     public static class Button extends FlowLayout {
         private final LabelComponent iconLabel;
 
-        public Button(Text icon, Text tooltip) {
+        public Button(Component icon, Component tooltip) {
             super(Sizing.fixed(16), Sizing.fixed(16), Algorithm.VERTICAL);
 
             child((iconLabel = Components.label(icon))
@@ -67,7 +67,7 @@ public class SidebarBuilder {
                 () -> surface(Surface.BLANK));
         }
 
-        public Button icon(Text icon) {
+        public Button icon(Component icon) {
             iconLabel.text(icon);
 
             return this;

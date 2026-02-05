@@ -1,13 +1,13 @@
 package io.wispforest.gadget.mixin.client;
 
 import io.wispforest.gadget.client.dump.ClientPacketDumper;
-import net.minecraft.client.network.MultiplayerServerListPinger;
+import net.minecraft.client.multiplayer.ServerStatusPinger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(MultiplayerServerListPinger.class)
+@Mixin(ServerStatusPinger.class)
 public class MultiplayerServerListPingerMixin {
 
     @Inject(method = "cancel", at = @At(value = "HEAD"))

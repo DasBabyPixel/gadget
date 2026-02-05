@@ -1,14 +1,14 @@
 package io.wispforest.gadget.mixin;
 
-import net.minecraft.nbt.NbtType;
-import net.minecraft.nbt.NbtTypes;
+import net.minecraft.nbt.TagType;
+import net.minecraft.nbt.TagTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(NbtTypes.class)
+@Mixin(TagTypes.class)
 public interface NbtTypesAccessor {
     @Accessor
-    static NbtType<?>[] getVALUES() {
+    static TagType<?>[] getVALUES() {
         throw new UnsupportedOperationException();
     }
 }

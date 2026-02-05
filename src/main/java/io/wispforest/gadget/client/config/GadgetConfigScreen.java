@@ -6,10 +6,10 @@ import io.wispforest.gadget.path.FieldPathStep;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.config.ui.OptionComponentFactory;
-import net.minecraft.client.gui.screen.Screen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import net.minecraft.client.gui.screens.Screen;
 
 public class GadgetConfigScreen extends ConfigScreen {
     @SuppressWarnings("unchecked")

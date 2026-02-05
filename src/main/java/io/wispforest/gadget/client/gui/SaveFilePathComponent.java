@@ -9,12 +9,12 @@ import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.gui.Click;
-import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 
 public class SaveFilePathComponent extends FlowLayout {
     private final String title;
@@ -28,7 +28,7 @@ public class SaveFilePathComponent extends FlowLayout {
         this.title = title;
         this.path = Observable.of(defaultPath);
 
-        this.label = Components.label(Text.literal("breh"));
+        this.label = Components.label(Component.literal("breh"));
 
         this.configureLabel(defaultPath);
         path.observe(this::configureLabel);
@@ -52,7 +52,7 @@ public class SaveFilePathComponent extends FlowLayout {
             newPath = "..." + newPath.substring(neededSlash);
         }
 
-        this.label.text(Text.literal(newPath));
+        this.label.text(Component.literal(newPath));
     }
 
     public List<String> patterns() {
@@ -79,7 +79,7 @@ public class SaveFilePathComponent extends FlowLayout {
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             Thread thread = new Thread(() -> {
                 String selected = DialogUtil.saveFileDialog(

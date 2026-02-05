@@ -5,13 +5,13 @@ import io.wispforest.gadget.client.gui.NotificationToast;
 import io.wispforest.gadget.dump.fake.GadgetDynamicRegistriesPacket;
 import io.wispforest.gadget.dump.write.PacketDumpWriter;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
-import net.minecraft.network.state.ConfigurationStates;
-import net.minecraft.network.state.NetworkState;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.ProtocolInfo;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,19 +35,19 @@ public class ClientPacketDumper {
             if (!Files.exists(DUMP_DIR))
                 Files.createDirectories(DUMP_DIR);
 
-            String filename = Util.getFormattedCurrentTime() + ".gdump";
+            String filename = Util.getFilenameFormattedDateTime() + ".gdump";
             WRITER = new PacketDumpWriter(DUMP_DIR.resolve(filename));
 
             LOGGER.info("Started dumping to {}", filename);
 
-            var handler = MinecraftClient.getInstance().getNetworkHandler();
+            var handler = Minecraft.getInstance().getConnection();
             if (handler != null) {
-                dump(GadgetDynamicRegistriesPacket.fromRegistries(handler.getRegistryManager()), ConfigurationStates.S2C);
+                dump(GadgetDynamicRegistriesPacket.fromRegistries(handler.registryAccess()), ConfigurationProtocols.CLIENTBOUND);
             }
 
             if (doToast)
                 new NotificationToast(
-                    Text.translatable("message.gadget.dump.started"),
+                    Component.translatable("message.gadget.dump.started"),
                     null
                 ).register();
         } catch (IOException e) {
@@ -67,8 +67,8 @@ public class ClientPacketDumper {
                 LOGGER.info("Saved dump to {}", dumper.path());
 
                 new NotificationToast(
-                    Text.translatable("message.gadget.dump.stopped"),
-                    Text.literal(dumper.path().getFileName().toString())
+                    Component.translatable("message.gadget.dump.stopped"),
+                    Component.literal(dumper.path().getFileName().toString())
                 )
                     .register();
 
@@ -80,12 +80,12 @@ public class ClientPacketDumper {
         }
     }
 
-    public static void dump(Packet<?> packet, NetworkState<?> state) {
+    public static void dump(Packet<?> packet, ProtocolInfo<?> state) {
         PacketDumpWriter writer = WRITER;
 
         if (writer == null) return;
 
-        if (packet instanceof ChunkDataS2CPacket && Gadget.CONFIG.dropChunkData())
+        if (packet instanceof ClientboundLevelChunkWithLightPacket && Gadget.CONFIG.dropChunkData())
             return;
 
         writer.write(packet, state);

@@ -8,16 +8,22 @@ import io.wispforest.gadget.util.ProgressToast;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.network.ClientRegistries;
+import net.minecraft.client.multiplayer.RegistryDataCollector;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.*;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
-import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
+import net.minecraft.network.protocol.game.GameProtocols;
+import net.minecraft.network.protocol.handshake.HandshakeProtocols;
+import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.LoginProtocols;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
+import net.minecraft.network.protocol.status.StatusProtocols;
 import net.minecraft.network.state.*;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.resource.ResourceFactory;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedInputStream;
@@ -61,10 +67,10 @@ public class PacketDumpDeserializer {
     private static ReadPacketDump readV1(InputStream is) {
         List<DumpedPacket> list = new ArrayList<>();
 
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
 
-        Int2ObjectMap<Identifier> loginQueryChannels = new Int2ObjectOpenHashMap<>();
-        DynamicRegistryManager registries = DynamicRegistryManager.of(Registries.REGISTRIES);
+        Int2ObjectMap<ResourceLocation> loginQueryChannels = new Int2ObjectOpenHashMap<>();
+        RegistryAccess registries = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
         try {
             while (true) {
@@ -80,36 +86,36 @@ public class PacketDumpDeserializer {
 
                 short flags = buf.readShort();
                 boolean outbound = (flags & 1) != 0;
-                NetworkPhase phase = switch (flags & 0b1110) {
-                    case 0b0000 -> NetworkPhase.HANDSHAKING;
-                    case 0b0100 -> NetworkPhase.STATUS;
-                    case 0b0110 -> NetworkPhase.LOGIN;
-                    case 0b1110 -> NetworkPhase.CONFIGURATION;
-                    case 0b0010 -> NetworkPhase.PLAY;
+                ConnectionProtocol phase = switch (flags & 0b1110) {
+                    case 0b0000 -> ConnectionProtocol.HANDSHAKING;
+                    case 0b0100 -> ConnectionProtocol.STATUS;
+                    case 0b0110 -> ConnectionProtocol.LOGIN;
+                    case 0b1110 -> ConnectionProtocol.CONFIGURATION;
+                    case 0b0010 -> ConnectionProtocol.PLAY;
                     default -> throw new IllegalStateException();
                 };
                 long sentAt = buf.readLong();
                 int size = buf.readableBytes();
 
                 // todo: actually gather DRM info
-                NetworkState<?> state = createState(phase, outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, registries);
+                ProtocolInfo<?> state = createState(phase, outbound ? PacketFlow.SERVERBOUND : PacketFlow.CLIENTBOUND, registries);
 
                 Packet<?> packet = PacketDumping.readPacket(buf, state);
-                Identifier channelId = NetworkUtil.getChannelOrNull(packet);
+                ResourceLocation channelId = NetworkUtil.getChannelOrNull(packet);
 
-                if (packet instanceof LoginQueryRequestS2CPacket req) {
-                    loginQueryChannels.put(req.queryId(), req.payload().id());
-                } else if (packet instanceof LoginQueryResponseC2SPacket res) {
-                    channelId = loginQueryChannels.get(res.queryId());
+                if (packet instanceof ClientboundCustomQueryPacket req) {
+                    loginQueryChannels.put(req.transactionId(), req.payload().id());
+                } else if (packet instanceof ServerboundCustomQueryAnswerPacket res) {
+                    channelId = loginQueryChannels.get(res.transactionId());
                 } else if (packet instanceof GadgetDynamicRegistriesPacket dyn) {
-                    var clientRegistries = new ClientRegistries();
+                    var clientRegistries = new RegistryDataCollector();
 
-                    dyn.elements().forEach(clientRegistries::putDynamicRegistry);
-                    clientRegistries.putTags(dyn.tags());
+                    dyn.elements().forEach(clientRegistries::appendContents);
+                    clientRegistries.appendTags(dyn.tags());
 
-                    registries = clientRegistries.createRegistryManager(
-                        ResourceFactory.MISSING,
-                        DynamicRegistryManager.of(Registries.REGISTRIES),
+                    registries = clientRegistries.collectGameRegistries(
+                        ResourceProvider.EMPTY,
+                        RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY),
                         false
                     );
                 }
@@ -123,36 +129,36 @@ public class PacketDumpDeserializer {
         }
     }
 
-    private static NetworkState<?> createState(NetworkPhase phase, NetworkSide side, DynamicRegistryManager registries) {
+    private static ProtocolInfo<?> createState(ConnectionProtocol phase, PacketFlow side, RegistryAccess registries) {
         return switch (phase) {
             case HANDSHAKING ->
                 switch (side) {
-                    case SERVERBOUND -> HandshakeStates.C2S;
+                    case SERVERBOUND -> HandshakeProtocols.SERVERBOUND;
                     case CLIENTBOUND -> throw new IllegalStateException();
                 };
 
             case STATUS ->
                 switch (side) {
-                    case SERVERBOUND -> QueryStates.C2S;
-                    case CLIENTBOUND -> QueryStates.S2C;
+                    case SERVERBOUND -> StatusProtocols.SERVERBOUND;
+                    case CLIENTBOUND -> StatusProtocols.CLIENTBOUND;
                 };
 
             case LOGIN ->
                 switch (side) {
-                    case SERVERBOUND -> LoginStates.C2S;
-                    case CLIENTBOUND -> LoginStates.S2C;
+                    case SERVERBOUND -> LoginProtocols.SERVERBOUND;
+                    case CLIENTBOUND -> LoginProtocols.CLIENTBOUND;
                 };
 
             case CONFIGURATION ->
                 switch (side) {
-                    case SERVERBOUND -> ConfigurationStates.C2S;
-                    case CLIENTBOUND -> ConfigurationStates.S2C;
+                    case SERVERBOUND -> ConfigurationProtocols.SERVERBOUND;
+                    case CLIENTBOUND -> ConfigurationProtocols.CLIENTBOUND;
                 };
 
             case PLAY ->
                 switch (side) {
-                    case SERVERBOUND -> PlayStateFactories.C2S.bind(RegistryByteBuf.makeFactory(registries), () -> true);
-                    case CLIENTBOUND -> PlayStateFactories.S2C.bind(RegistryByteBuf.makeFactory(registries));
+                    case SERVERBOUND -> GameProtocols.SERVERBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registries), () -> true);
+                    case CLIENTBOUND -> GameProtocols.CLIENTBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registries));
                 };
         };
     }

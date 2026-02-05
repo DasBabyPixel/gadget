@@ -4,15 +4,18 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import io.netty.buffer.ByteBuf;
 import io.wispforest.gadget.mixin.TagPacketSerializerAccessor;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.RegistrySynchronization;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.registry.*;
-import net.minecraft.registry.tag.TagPacketSerializer;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagNetworkSerialization;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,27 +23,27 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public record GadgetDynamicRegistriesPacket(
-    Map<RegistryKey<? extends Registry<?>>, List<SerializableRegistries.SerializedRegistryEntry>> elements,
-    Map<RegistryKey<? extends Registry<?>>, TagPacketSerializer.Serialized> tags
+    Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> elements,
+    Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> tags
 ) implements FakeGadgetPacket {
     public static final int ID = -3;
 
-    private static final PacketCodec<ByteBuf, RegistryKey<? extends Registry<?>>> REGISTRY_KEY_CODEC = Identifier.PACKET_CODEC
-        .xmap(RegistryKey::ofRegistry, RegistryKey::getValue);
+    private static final StreamCodec<ByteBuf, ResourceKey<? extends Registry<?>>> REGISTRY_KEY_CODEC = ResourceLocation.STREAM_CODEC
+        .map(ResourceKey::createRegistryKey, ResourceKey::location);
 
-    private static final PacketCodec<PacketByteBuf, TagPacketSerializer.Serialized> TAG_SERIALIZED_CODEC = PacketCodec.of(
-        TagPacketSerializer.Serialized::writeBuf,
-        TagPacketSerializer.Serialized::fromBuf
+    private static final StreamCodec<FriendlyByteBuf, TagNetworkSerialization.NetworkPayload> TAG_SERIALIZED_CODEC = StreamCodec.ofMember(
+        TagNetworkSerialization.NetworkPayload::write,
+        TagNetworkSerialization.NetworkPayload::read
     );
 
-    public static final PacketCodec<PacketByteBuf, GadgetDynamicRegistriesPacket> CODEC = PacketCodec.tuple(
-        PacketCodecs.map(
+    public static final StreamCodec<FriendlyByteBuf, GadgetDynamicRegistriesPacket> CODEC = StreamCodec.composite(
+        ByteBufCodecs.map(
             HashMap::new,
             REGISTRY_KEY_CODEC,
-            SerializableRegistries.SerializedRegistryEntry.PACKET_CODEC.collect(PacketCodecs.toList())
+            RegistrySynchronization.PackedRegistryEntry.STREAM_CODEC.apply(ByteBufCodecs.list())
         ),
         GadgetDynamicRegistriesPacket::elements,
-        PacketCodecs.map(
+        ByteBufCodecs.map(
             HashMap::new,
             REGISTRY_KEY_CODEC,
             TAG_SERIALIZED_CODEC
@@ -49,16 +52,16 @@ public record GadgetDynamicRegistriesPacket(
         GadgetDynamicRegistriesPacket::new
     );
 
-    public static GadgetDynamicRegistriesPacket fromRegistries(DynamicRegistryManager.Immutable registries) {
-        DynamicOps<NbtElement> dynamicOps = registries.getOps(NbtOps.INSTANCE);
-        Map<RegistryKey<? extends Registry<?>>, List<SerializableRegistries.SerializedRegistryEntry>> elements = new HashMap<>();
+    public static GadgetDynamicRegistriesPacket fromRegistries(RegistryAccess.Frozen registries) {
+        DynamicOps<Tag> dynamicOps = registries.createSerializationContext(NbtOps.INSTANCE);
+        Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> elements = new HashMap<>();
 
-        Map<RegistryKey<? extends Registry<?>>, TagPacketSerializer.Serialized> tags = registries.streamAllRegistries()
+        Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> tags = registries.registries()
             .map(registry -> Pair.of(registry.key(), TagPacketSerializerAccessor.serializeTags(registry.value())))
             .filter(pair -> !pair.getSecond().isEmpty())
             .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 
-        SerializableRegistries.forEachSyncedRegistry(
+        RegistrySynchronization.packRegistries(
             dynamicOps,
             registries,
             Set.of(),
@@ -74,7 +77,7 @@ public record GadgetDynamicRegistriesPacket(
     }
 
     @Override
-    public PacketCodec<PacketByteBuf, GadgetDynamicRegistriesPacket> codec() {
+    public StreamCodec<FriendlyByteBuf, GadgetDynamicRegistriesPacket> codec() {
         return CODEC;
     }
 

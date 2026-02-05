@@ -4,14 +4,12 @@ import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.RotationAxis;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.client.input.KeyEvent;
 
 // Copied from owo-ui's CollapsibleContainer
 public class SubObjectContainer extends FlowLayout {
@@ -86,7 +84,7 @@ public class SubObjectContainer extends FlowLayout {
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
+    public boolean onKeyPress(KeyEvent input) {
         if (input.key() == GLFW.GLFW_KEY_SPACE || input.key() == GLFW.GLFW_KEY_ENTER || input.key() == GLFW.GLFW_KEY_KP_ENTER) {
             this.toggleExpansion();
 
@@ -139,7 +137,7 @@ public class SubObjectContainer extends FlowLayout {
         protected float targetRotation = 90;
 
         public SpinnyBoiComponent() {
-            super(Text.literal(">"));
+            super(net.minecraft.network.chat.Component.literal(">"));
             this.margins(Insets.horizontal(4));
         }
 
@@ -151,7 +149,7 @@ public class SubObjectContainer extends FlowLayout {
 
         @Override
         public void draw(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
-            var matrices = ctx.getMatrices();
+            var matrices = ctx.pose();
 
             matrices.pushMatrix();
             matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1);

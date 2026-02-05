@@ -15,12 +15,6 @@ import io.wispforest.owo.ui.container.OverlayContainer;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -39,6 +33,12 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     private final Screen parent;
@@ -59,23 +59,23 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     public static void openWithProgress(Screen parent, Path path) {
-        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_dump"));
-        MinecraftClient client = MinecraftClient.getInstance();
+        ProgressToast toast = ProgressToast.create(Component.translatable("message.gadget.loading_dump"));
+        Minecraft client = Minecraft.getInstance();
 
         toast.follow(
             CompletableFuture.supplyAsync(() -> {
                 try {
-                    toast.step(Text.translatable("message.gadget.progress.reading_packets"));
+                    toast.step(Component.translatable("message.gadget.progress.reading_packets"));
                     var reader = new PacketDumpReader(path, toast);
 
                     if (reader.readError() != null) {
                         new NotificationToast(
-                            Text.translatable("message.gadget.dump.error"),
-                            Text.translatable("message.gadget.dump.error.desc")
+                            Component.translatable("message.gadget.dump.error"),
+                            Component.translatable("message.gadget.dump.error.desc")
                         ).register();
                     }
 
-                    toast.step(Text.translatable("message.gadget.progress.building_screen"));
+                    toast.step(Component.translatable("message.gadget.progress.building_screen"));
                     OpenDumpScreen screen = new OpenDumpScreen(parent, toast, reader, path);
 //                    screen.init(client, parent.width, parent.height);
 //                    screen.toast = null;
@@ -119,12 +119,12 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         searchBox.setMaxLength(1000);
 
         rootComponent.keyPress().subscribe((input) -> {
-            if (input.key() != GLFW.GLFW_KEY_F || !input.hasCtrl())
+            if (input.key() != GLFW.GLFW_KEY_F || !input.hasControlDown())
                 return false;
 
             uiAdapter.rootComponent.focusHandler().focus(
                 searchBox,
-                Component.FocusSource.MOUSE_CLICK
+                io.wispforest.owo.ui.core.Component.FocusSource.MOUSE_CLICK
             );
 
             return true;
@@ -132,10 +132,10 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
         timeSlider = new BasedSliderComponent(Sizing.fill(95));
         timeSlider
-            .tooltipFactory(value -> Text.of(TimeUtil.toHMS(currentTime(value) - reader.startTime())))
-            .message(unused -> Text.of(TimeUtil.toHMS(currentTime() - reader.startTime())));
+            .tooltipFactory(value -> Component.nullToEmpty(TimeUtil.toHMS(currentTime(value) - reader.startTime())))
+            .message(unused -> Component.nullToEmpty(TimeUtil.toHMS(currentTime() - reader.startTime())));
         timeSlider.onChanged().subscribe(value -> {
-            rebuild(searchBox.getText(), currentTime());
+            rebuild(searchBox.getValue(), currentTime());
         });
 
         rootComponent
@@ -155,7 +155,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
         SidebarBuilder sidebar = new SidebarBuilder();
 
-        FlowLayout infoButton = new SidebarBuilder.Button(Text.translatable("text.gadget.info"), Text.empty()) {
+        FlowLayout infoButton = new SidebarBuilder.Button(Component.translatable("text.gadget.info"), Component.empty()) {
             private int totalComponents = -1;
             private int frameNumber = 11;
 
@@ -173,34 +173,34 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                     totalComponents = total.getValue();
                 }
 
-                List<TooltipComponent> tooltip = new ArrayList<>();
+                List<ClientTooltipComponent> tooltip = new ArrayList<>();
 
-                tooltip.add(TooltipComponent.of(
-                    Text.translatable("text.gadget.info.fps", client.getCurrentFps())
-                        .asOrderedText()));
+                tooltip.add(ClientTooltipComponent.create(
+                    Component.translatable("text.gadget.info.fps", minecraft.getFps())
+                        .getVisualOrderText()));
 
-                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_components", totalComponents).asOrderedText()));
+                tooltip.add(ClientTooltipComponent.create(Component.translatable("text.gadget.info.total_components", totalComponents).getVisualOrderText()));
 
-                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_packets", reader.packets().size()).asOrderedText()));
+                tooltip.add(ClientTooltipComponent.create(Component.translatable("text.gadget.info.total_packets", reader.packets().size()).getVisualOrderText()));
 
-                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.packets_on_screen", main.children().size()).asOrderedText()));
+                tooltip.add(ClientTooltipComponent.create(Component.translatable("text.gadget.info.packets_on_screen", main.children().size()).getVisualOrderText()));
 
-                ctx.drawTooltip(client.textRenderer, mouseX, mouseY, tooltip);
+                ctx.drawTooltip(minecraft.font, mouseX, mouseY, tooltip);
             }
         };
 
         sidebar.layout().child(infoButton);
 
         sidebar.button("text.gadget.stats", (mouseX, mouseY) -> {
-            ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_dump_stats"));
+            ProgressToast toast = ProgressToast.create(Component.translatable("message.gadget.loading_dump_stats"));
 
             toast.follow(
                 CompletableFuture.supplyAsync(() -> {
-                        toast.step(Text.translatable("message.gadget.progress.calculating_data"));
+                        toast.step(Component.translatable("message.gadget.progress.calculating_data"));
 
                         return new DumpStatsScreen(this, reader, toast);
                     })
-                    .thenAcceptAsync(client::setScreen, client),
+                    .thenAcceptAsync(minecraft::setScreen, minecraft),
                 true);
         });
 
@@ -208,7 +208,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
         rootComponent.child(sidebar.layout());
 
-        toast.step(Text.translatable("message.gadget.progress.mounting_components"));
+        toast.step(Component.translatable("message.gadget.progress.mounting_components"));
     }
 
     @Override
@@ -220,7 +220,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     private long currentTime(double value) {
-        return (long) MathHelper.lerp(value, reader.startTime(), reader.endTime());
+        return (long) Mth.lerp(value, reader.startTime(), reader.endTime());
     }
 
     private long currentTime() {
@@ -234,9 +234,9 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             var printStream = new PrintStream(bos, true, StandardCharsets.UTF_8.name());
             FormattedDumper dumper = new FormattedDumper(printStream);
 
-            ProgressToast toast = ProgressToast.create(Text.translatable("text.gadget.export.exporting_packet_dump"));
+            ProgressToast toast = ProgressToast.create(Component.translatable("text.gadget.export.exporting_packet_dump"));
             dumper.write(0, "Packet dump " + this.path.getFileName().toString());
-            dumper.write(0, "Search text is " + searchBox.getText());
+            dumper.write(0, "Search text is " + searchBox.getValue());
             dumper.write(0, packets.size() + " total packets");
             dumper.write(0, "");
 
@@ -280,7 +280,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.DARK_PANEL)
             .padding(Insets.of(8));
 
-        exportModal.child(Components.label(Text.translatable("text.gadget.export.packet_dump"))
+        exportModal.child(Components.label(Component.translatable("text.gadget.export.packet_dump"))
             .margins(Insets.bottom(4)));
 
         SaveFilePathComponent savePath = new SaveFilePathComponent(
@@ -289,26 +289,26 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             .pattern("*.txt")
             .filterDescription("Plain Text file");
 
-        LabelComponent progressLabel = Components.label(Text.translatable("text.gadget.export.gather_progress", 0));
+        LabelComponent progressLabel = Components.label(Component.translatable("text.gadget.export.gather_progress", 0));
         Observable<Integer> count = Observable.of(0);
 
-        ReactiveUtils.throttle(count, TimeUnit.MILLISECONDS.toNanos(100), client)
+        ReactiveUtils.throttle(count, TimeUnit.MILLISECONDS.toNanos(100), minecraft)
             .observe(progress ->
-                progressLabel.text(Text.translatable("text.gadget.export.gather_progress", progress)));
+                progressLabel.text(Component.translatable("text.gadget.export.gather_progress", progress)));
 
 
         CompletableFuture<List<DumpedPacket>> collected = CompletableFuture.supplyAsync(() ->
-            reader.collectFor(searchBox.getText(), currentTime(), Integer.MAX_VALUE, count::set, tokSource.token()));
+            reader.collectFor(searchBox.getValue(), currentTime(), Integer.MAX_VALUE, count::set, tokSource.token()));
 
         exportModal.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
-            .child(Components.label(Text.translatable("text.gadget.export.output_path")))
+            .child(Components.label(Component.translatable("text.gadget.export.output_path")))
             .child(savePath)
             .verticalAlignment(VerticalAlignment.CENTER)
         );
 
         exportModal.child(progressLabel);
 
-        var button = Components.button(Text.translatable("text.gadget.export.export_button"), b -> {
+        var button = Components.button(Component.translatable("text.gadget.export.export_button"), b -> {
             tokSource.token().throwIfCancelled();
             exportOverlay.remove();
 
@@ -318,12 +318,12 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         button.active(false);
         collected.whenCompleteAsync((r, t) -> {
             if (t != null) {
-                exportModal.child(exportModal.children().size() - 1, Components.label(Text.translatable("text.gadget.export.error")));
+                exportModal.child(exportModal.children().size() - 1, Components.label(Component.translatable("text.gadget.export.error")));
                 Gadget.LOGGER.error("Error occured while gathering packets for export", t);
             } else {
                 button.active(true);
             }
-        }, client);
+        }, minecraft);
 
         exportModal.child(button);
 
@@ -331,15 +331,15 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (input.key() == GLFW.GLFW_KEY_E && input.hasCtrl()) {
+    public boolean keyPressed(KeyEvent input) {
+        if (input.key() == GLFW.GLFW_KEY_E && input.hasControlDown()) {
             openExportModal();
 
             return true;
         }
 
         if (input.key() == GLFW.GLFW_KEY_ESCAPE) {
-            for (Component rootChild : uiAdapter.rootComponent.children()) {
+            for (io.wispforest.owo.ui.core.Component rootChild : uiAdapter.rootComponent.children()) {
                 if (rootChild instanceof OverlayContainer<?> overlay && overlay.closeOnClick()) {
                     overlay.remove();
                     return true;
@@ -358,7 +358,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         CancellationToken token = currentSearchToken.token();
 
         CompletableFuture.supplyAsync(() -> {
-            List<Component> neededComponents = new ArrayList<>();
+            List<io.wispforest.owo.ui.core.Component> neededComponents = new ArrayList<>();
 
             for (var packet : reader.collectFor(searchText, time, 300, unused -> {}, token)) {
                 token.throwIfCancelled();
@@ -372,7 +372,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                     main.clearChildren();
                     main.children(components);
                 });
-            }, client)
+            }, minecraft)
             .whenComplete((r, t) -> {
                 if (t != null) {
                     if (t.getCause() instanceof CancellationException) return;
@@ -383,7 +383,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     @Override
-    public void close() {
-        client.setScreen(parent);
+    public void onClose() {
+        minecraft.setScreen(parent);
     }
 }
