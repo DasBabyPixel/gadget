@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DisconnectedScreen.class)
 public class DisconnectedScreenMixin {
-    @Inject(method = "<init>(Lnet/minecraft/client/gui/screen/Screen;Lnet/minecraft/text/Text;Lnet/minecraft/network/DisconnectionInfo;Lnet/minecraft/text/Text;)V", at = @At("TAIL"))
+    @Inject(method = "<init>(Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/DisconnectionDetails;Lnet/minecraft/network/chat/Component;)V", at = @At("TAIL"))
     private void disableDump(Screen parent, Component title, DisconnectionDetails info, Component buttonLabel, CallbackInfo ci) {
         if (ClientPacketDumper.isDumping())
             ClientPacketDumper.stop();

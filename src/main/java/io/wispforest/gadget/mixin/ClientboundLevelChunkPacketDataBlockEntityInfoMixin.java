@@ -10,11 +10,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(targets = "net/minecraft/network/packet/s2c/play/ChunkData$BlockEntityData")
-public class ChunkDataBlockEntityDataMixin {
+@Mixin(targets = "net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData$BlockEntityInfo")
+public class ClientboundLevelChunkPacketDataBlockEntityInfoMixin {
     @Unique private int gadget$originalBlockEntityTypeId = -1;
 
-    @Inject(method = "<init>(Lnet/minecraft/network/RegistryByteBuf;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/PacketCodec;decode(Ljava/lang/Object;)Ljava/lang/Object;"))
+    @Inject(method = "<init>(Lnet/minecraft/network/RegistryFriendlyByteBuf;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/StreamCodec;decode(Ljava/lang/Object;)Ljava/lang/Object;"))
     private void saveId(RegistryFriendlyByteBuf buf, CallbackInfo ci) {
         int readerIdx = buf.readerIndex();
 
@@ -25,7 +25,7 @@ public class ChunkDataBlockEntityDataMixin {
         }
     }
 
-    @WrapWithCondition(method = "write", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/PacketCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V"))
+    @WrapWithCondition(method = "write", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/StreamCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V"))
     private boolean useId(StreamCodec<?, ?> instance, Object buf, Object type) {
         if (type == null) {
             ((FriendlyByteBuf) buf).writeVarInt(gadget$originalBlockEntityTypeId);

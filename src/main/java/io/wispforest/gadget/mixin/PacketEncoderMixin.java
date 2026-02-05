@@ -15,13 +15,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PacketEncoder.class)
-public class EncoderHandlerMixin {
-    @Shadow @Final private ProtocolInfo<?> state;
+public class PacketEncoderMixin {
+    @Shadow @Final private ProtocolInfo<?> protocolInfo;
 
-    @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/packet/Packet;Lio/netty/buffer/ByteBuf;)V", at = @At("HEAD"))
+    @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V", at = @At("HEAD"))
     private void writeHook(ChannelHandlerContext channelHandlerContext, Packet<?> packet, ByteBuf byteBuf, CallbackInfo ci) {
-        if (state.flow() == PacketFlow.CLIENTBOUND) return;
+        if (protocolInfo.flow() == PacketFlow.CLIENTBOUND) return;
 
-        ClientPacketDumper.dump(packet, state);
+        ClientPacketDumper.dump(packet, protocolInfo);
     }
 }

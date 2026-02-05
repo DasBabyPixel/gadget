@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ChatComponent.class)
-public interface ChatHudAccessor {
+public interface ChatComponentAccessor {
     @Invoker
-    void callAddMessage(Component message, @Nullable MessageSignature signatureData, @Nullable GuiMessageTag indicator);
+    void callAddMessage(Component message, @Nullable MessageSignature signature, @Nullable GuiMessageTag tag);
 }

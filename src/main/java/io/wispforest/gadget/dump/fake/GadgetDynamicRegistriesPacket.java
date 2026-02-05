@@ -3,7 +3,12 @@ package io.wispforest.gadget.dump.fake;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import io.netty.buffer.ByteBuf;
-import io.wispforest.gadget.mixin.TagPacketSerializerAccessor;
+import io.wispforest.gadget.mixin.TagNetworkSerializationAccessor;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
@@ -12,15 +17,9 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.registry.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagNetworkSerialization;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public record GadgetDynamicRegistriesPacket(
     Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> elements,
@@ -57,7 +56,7 @@ public record GadgetDynamicRegistriesPacket(
         Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> elements = new HashMap<>();
 
         Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> tags = registries.registries()
-            .map(registry -> Pair.of(registry.key(), TagPacketSerializerAccessor.serializeTags(registry.value())))
+            .map(registry -> Pair.of(registry.key(), TagNetworkSerializationAccessor.serializeToNetwork(registry.value())))
             .filter(pair -> !pair.getSecond().isEmpty())
             .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 

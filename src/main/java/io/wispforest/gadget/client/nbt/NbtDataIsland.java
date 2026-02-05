@@ -2,7 +2,7 @@ package io.wispforest.gadget.client.nbt;
 
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
-import io.wispforest.gadget.mixin.NbtTypesAccessor;
+import io.wispforest.gadget.mixin.TagTypesAccessor;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
@@ -217,7 +217,7 @@ public class NbtDataIsland extends FlowLayout {
 
         var dropdown = GuiUtil.contextMenu(GuiUtil.root(this), mouseX, mouseY);
 
-        for (TagType<?> type : NbtTypesAccessor.getVALUES()) {
+        for (TagType<?> type : TagTypesAccessor.getTYPES()) {
             dropdown.button(typeText(type, ".full"),
                 unused -> consumer.accept(type));
         }

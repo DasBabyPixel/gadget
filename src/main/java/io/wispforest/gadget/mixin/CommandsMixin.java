@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Commands.class)
-public class CommandManagerMixin {
-    @Inject(method = "sendCommandTree(Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("HEAD"))
+public class CommandsMixin {
+    @Inject(method = "sendCommands(Lnet/minecraft/server/level/ServerPlayer;)V", at = @At("HEAD"))
     private void onReloadPermissions(ServerPlayer player, CallbackInfo ci) {
         boolean canReplaceStacks = Permissions.check(player, "gadget.replaceStack", 4);
         boolean canRequestServerData = Permissions.check(player, "gadget.requestServerData", 4);

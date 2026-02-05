@@ -6,10 +6,10 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
     // TODO: idfk anymore.
-//    @Inject(method = "renderWorld", at = @At("RETURN"))
-//    private void checkMatrixStack(RenderTickCounter tickCounter, CallbackInfo ci) {
-//        if (!matrices.isEmpty()) {
-//            MatrixStackLogger.tripError(matrices, "Matrix stack not empty");
+//    @Inject(method = "renderLevel", at = @At("RETURN"))
+//    private void checkPoseStack(DeltaTracker tickCounter, CallbackInfo ci) {
+//        if (!poses.isEmpty()) {
+//            MatrixStackLogger.tripError(poses, "Pose stack not empty");
 //        }
 //    }
 }

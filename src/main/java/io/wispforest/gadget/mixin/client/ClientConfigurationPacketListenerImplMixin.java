@@ -17,12 +17,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientConfigurationPacketListenerImpl.class)
-public abstract class ClientConfigurationNetworkHandlerMixin extends ClientCommonPacketListenerImpl {
-    protected ClientConfigurationNetworkHandlerMixin(Minecraft client, Connection connection, CommonListenerCookie connectionState) {
-        super(client, connection, connectionState);
+public abstract class ClientConfigurationPacketListenerImplMixin extends ClientCommonPacketListenerImpl {
+    protected ClientConfigurationPacketListenerImplMixin(Minecraft minecraft, Connection connection, CommonListenerCookie connectionState) {
+        super(minecraft, connection, connectionState);
     }
 
-    @Inject(method = "onReady", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;transitionInbound(Lnet/minecraft/network/state/NetworkState;Lnet/minecraft/network/listener/PacketListener;)V"))
+    @Inject(method = "handleConfigurationFinished", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;setupInboundProtocol(Lnet/minecraft/network/ProtocolInfo;Lnet/minecraft/network/PacketListener;)V"))
     private void writeRegistries(ClientboundFinishConfigurationPacket packet, CallbackInfo ci, @Local RegistryAccess.Frozen registries) {
         if (!ClientPacketDumper.isDumping()) return;
 

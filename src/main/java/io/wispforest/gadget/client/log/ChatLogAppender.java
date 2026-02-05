@@ -1,12 +1,6 @@
 package io.wispforest.gadget.client.log;
 
-import io.wispforest.gadget.mixin.client.ChatHudAccessor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Layout;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.layout.PatternLayout;
-
+import io.wispforest.gadget.mixin.client.ChatComponentAccessor;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -16,10 +10,15 @@ import java.util.Set;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 public class ChatLogAppender extends AbstractAppender {
     public static final ChatLogAppender INSTANCE = new ChatLogAppender();
-    public static final GuiMessageTag MESSAGE_INDICATOR = new GuiMessageTag(
+    public static final GuiMessageTag MESSAGE_TAG = new GuiMessageTag(
         0x0096FF,
         null,
         Component.translatable("chat.tag.gadget.loud_logging"),
@@ -91,11 +90,11 @@ public class ChatLogAppender extends AbstractAppender {
         client.execute(() -> {
             if (client.player == null) return;
 
-            ((ChatHudAccessor) client.gui.getChat())
+            ((ChatComponentAccessor) client.gui.getChat())
                 .callAddMessage(
                     text,
                     null,
-                    MESSAGE_INDICATOR
+                        MESSAGE_TAG
                 );
         });
     }

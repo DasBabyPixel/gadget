@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(AccountProfileKeyPairManager.class)
-public class ProfileKeysImplMixin {
+public class AccountProfileKeyPairManagerMixin {
     @Mutable @Shadow @Final private static Logger LOGGER;
 
     @Inject(method = "<clinit>", at = @At("RETURN"))

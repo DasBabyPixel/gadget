@@ -6,9 +6,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(TagTypes.class)
-public interface NbtTypesAccessor {
+public interface TagTypesAccessor {
     @Accessor
-    static TagType<?>[] getVALUES() {
+    static TagType<?>[] getTYPES() {
         throw new UnsupportedOperationException();
     }
 }

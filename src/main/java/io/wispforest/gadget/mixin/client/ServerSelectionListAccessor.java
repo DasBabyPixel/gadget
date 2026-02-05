@@ -6,15 +6,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ServerSelectionList.class)
-public interface MultiplayerServerListWidgetAccessor {
+public interface ServerSelectionListAccessor {
 
     @Accessor
-    static Component getCANNOT_RESOLVE_TEXT() {
+    static Component getCANT_RESOLVE_TEXT() {
         throw new AssertionError();
     }
 
     @Accessor
-    static Component getCANNOT_CONNECT_TEXT() {
+    static Component getCANT_CONNECT_TEXT() {
         throw new AssertionError();
     }
 

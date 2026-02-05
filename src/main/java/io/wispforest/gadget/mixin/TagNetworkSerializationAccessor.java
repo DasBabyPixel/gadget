@@ -6,9 +6,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(TagNetworkSerialization.class)
-public interface TagPacketSerializerAccessor {
-    @Invoker("serializeTags")
-    static <T> TagNetworkSerialization.NetworkPayload serializeTags(Registry<T> registry) {
+public interface TagNetworkSerializationAccessor {
+    @Invoker("serializeToNetwork")
+    static <T> TagNetworkSerialization.NetworkPayload serializeToNetwork(Registry<T> registry) {
         throw new IllegalStateException();
     }
 }

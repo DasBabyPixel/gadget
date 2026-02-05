@@ -7,10 +7,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(AbstractSelectionList.class)
-public interface EntryListWidgetAccessor extends GuiEventListener {
+public interface AbstractSelectionListAccessor extends GuiEventListener {
     @Invoker
     int callGetRowTop(int index);
 
     @Accessor
-    int getItemHeight();
+    int getDefaultEntryHeight();
 }

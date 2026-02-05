@@ -16,20 +16,20 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(WorldSelectionList.WorldListEntry.class)
-public abstract class WorldListWidgetWorldEntryMixin {
+public abstract class WorldSelectionListWorldListEntryMixin {
     @Shadow @Final private Screen screen;
 
-    @Shadow public abstract void play();
+    @Shadow public abstract void joinWorld();
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void onRightClick(MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
-        if (click.button() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
+    private void onRightClick(MouseButtonEvent event, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
+        if (event.button() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
         if (!Gadget.CONFIG.rightClickDump()) return;
 
-        ContextMenuScreens.contextMenuAt(screen, click.x(), click.y())
+        ContextMenuScreens.contextMenuAt(screen, event.x(), event.y())
                 .button(Component.translatable("text.gadget.join_with_dump"), dropdown2 -> {
                     DumpPrimer.isPrimed = true;
-                    play();
+                    joinWorld();
                 });
 
         cir.setReturnValue(true);

@@ -12,11 +12,11 @@ import java.util.WeakHashMap;
 import net.minecraft.client.Minecraft;
 
 // TODO: remove debugging^2, or just remove this entirely.
-public final class MatrixStackLogger {
+public final class PoseStackLogger {
     private static volatile int ERROR_MODE = 0;
     private static final Map<PoseStack, StringBuilder> LOGS = Collections.synchronizedMap(new WeakHashMap<>());
 
-    private MatrixStackLogger() {
+    private PoseStackLogger() {
 
     }
 

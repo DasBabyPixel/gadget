@@ -4,6 +4,7 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import io.wispforest.gadget.client.dump.DumpPrimer;
 import io.wispforest.gadget.client.gui.ContextMenuScreens;
+import java.net.UnknownHostException;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -19,19 +20,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.net.UnknownHostException;
-
 @Mixin(ServerSelectionList.OnlineServerEntry.class)
-public abstract class MultiplayerServerEntryMixin {
+public abstract class OnlineServerEntryMixin {
     @Shadow @Final private JoinMultiplayerScreen screen;
 
-    @Shadow @Final private ServerData server;
+    @Shadow @Final private ServerData serverData;
 
-    @Shadow @Final private Minecraft client;
+    @Shadow @Final private Minecraft minecraft;
 
-    @Shadow public abstract void saveFile();
+    @Shadow public abstract void updateServerList();
 
-    @Shadow protected abstract void update();
+    @Shadow protected abstract void refreshStatus();
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void onRightClick(MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
@@ -42,31 +41,31 @@ public abstract class MultiplayerServerEntryMixin {
             .button(Component.translatable("text.gadget.join_with_dump"), dropdown2 -> {
                 DumpPrimer.isPrimed = true;
 
-                this.screen.join(server);
+                this.screen.join(serverData);
             })
             .button(Component.translatable("text.gadget.query_with_dump"), dropdown2 -> {
                 ClientPacketDumper.start(false);
 
                 try {
                     this.screen.getPinger().pingServer(
-                        this.server,
-                        () -> this.client.execute(this::saveFile),
+                        this.serverData,
+                        () -> this.minecraft.execute(this::updateServerList),
                         () -> {
-                            this.server
+                            this.serverData
                                 .setState(
-                                    this.server.protocol == SharedConstants.getCurrentVersion().protocolVersion()
+                                    this.serverData.protocol == SharedConstants.getCurrentVersion().protocolVersion()
                                         ? ServerData.State.SUCCESSFUL
                                         : ServerData.State.INCOMPATIBLE
                                 );
-                            this.client.execute(this::update);
+                            this.minecraft.execute(this::refreshStatus);
                         }
                     );
                 } catch (UnknownHostException var2x) {
-                    this.server.ping = -1L;
-                    this.server.motd = MultiplayerServerListWidgetAccessor.getCANNOT_RESOLVE_TEXT();
+                    this.serverData.ping = -1L;
+                    this.serverData.motd = ServerSelectionListAccessor.getCANT_RESOLVE_TEXT();
                 } catch (Exception var3x) {
-                    this.server.ping = -1L;
-                    this.server.motd = MultiplayerServerListWidgetAccessor.getCANNOT_CONNECT_TEXT();
+                    this.serverData.ping = -1L;
+                    this.serverData.motd = ServerSelectionListAccessor.getCANT_CONNECT_TEXT();
                 }
             });
 

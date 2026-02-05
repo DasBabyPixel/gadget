@@ -6,8 +6,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(FilePackResources.class)
-public class ZipResourcePackMixin {
-    @ModifyVariable(method = "findResources", at = @At(value = "INVOKE", target = "Ljava/util/Enumeration;hasMoreElements()Z"), ordinal = 3)
+public class FilePackResourcesMixin {
+    @ModifyVariable(method = "listResources", at = @At(value = "INVOKE", target = "Ljava/util/Enumeration;hasMoreElements()Z"), ordinal = 3)
     private String makeItBetter(String in) {
         return in.replace("//", "/");
     }

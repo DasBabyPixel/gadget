@@ -1,7 +1,7 @@
 package io.wispforest.gadget.client.gui.inspector;
 
-import io.wispforest.gadget.mixin.client.EntryListWidgetAccessor;
-import io.wispforest.gadget.mixin.client.EntryListWidgetEntryAccessor;
+import io.wispforest.gadget.mixin.client.AbstractSelectionListAccessor;
+import io.wispforest.gadget.mixin.client.AbstractSelectionListEntryAccessor;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.AbstractWidget;
 
@@ -20,7 +20,7 @@ public final class VanillaSupport {
             AbstractWidget::getHeight
         ));
 
-        ElementUtils.registerElementSupport(EntryListWidgetAccessor.class, ElementSupport.fromLambda(
+        ElementUtils.registerElementSupport(AbstractSelectionListAccessor.class, ElementSupport.fromLambda(
             w -> ((AbstractWidget) w).getX(),
             w -> ((AbstractWidget) w).getY(),
             w -> ((AbstractWidget) w).getWidth(),
@@ -29,20 +29,20 @@ public final class VanillaSupport {
 
         ElementUtils.registerElementSupport(AbstractSelectionList.Entry.class, ElementSupport.fromLambda(
             w -> {
-                var list = ((EntryListWidgetEntryAccessor) w).getParentList();
+                var list = ((AbstractSelectionListEntryAccessor) w).getList();
                 return list.getRowLeft();
             },
             w -> {
-                var list = ((EntryListWidgetEntryAccessor) w).getParentList();
-                return ((EntryListWidgetAccessor) list).callGetRowTop(list.children().indexOf(w));
+                var list = ((AbstractSelectionListEntryAccessor) w).getList();
+                return ((AbstractSelectionListAccessor) list).callGetRowTop(list.children().indexOf(w));
             },
             w -> {
-                var list = ((EntryListWidgetEntryAccessor) w).getParentList();
+                var list = ((AbstractSelectionListEntryAccessor) w).getList();
                 return list.getRowWidth();
             },
             w -> {
-                var list = ((EntryListWidgetEntryAccessor) w).getParentList();
-                return ((EntryListWidgetAccessor) list).getItemHeight();
+                var list = ((AbstractSelectionListEntryAccessor) w).getList();
+                return ((AbstractSelectionListAccessor) list).getDefaultEntryHeight();
             }
         ));
     }

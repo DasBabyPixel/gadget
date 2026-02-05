@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(AbstractSelectionList.Entry.class)
-public interface EntryListWidgetEntryAccessor {
+public interface AbstractSelectionListEntryAccessor {
     @Accessor
-    AbstractSelectionList<?> getParentList();
+    AbstractSelectionList<?> getList();
 }

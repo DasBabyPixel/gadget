@@ -6,9 +6,9 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -17,7 +17,7 @@ public class GadgetTestmodClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        Registry.register(Registries.ITEM, Identifier.of("gadget-testmod", "funny"), FUNNY_ITEM);
+        Registry.register(BuiltInRegistries.ITEM, ResourceLocation.fromNamespaceAndPath("gadget-testmod", "funny"), FUNNY_ITEM);
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(literal("gadget-testmod")
@@ -28,8 +28,8 @@ public class GadgetTestmodClient implements ClientModInitializer {
                     })));
         });
 
-        PayloadTypeRegistry.playC2S().register(EpicPacket.ID, CodecUtils.toPacketCodec(EpicPacket.ENDEC));
-        ServerPlayNetworking.registerGlobalReceiver(EpicPacket.ID, (pkt, ctx) -> {
+        PayloadTypeRegistry.playC2S().register(EpicPacket.TYPE, CodecUtils.toPacketCodec(EpicPacket.ENDEC));
+        ServerPlayNetworking.registerGlobalReceiver(EpicPacket.TYPE, (pkt, ctx) -> {
             // Do nothing.
         });
     }

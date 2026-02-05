@@ -14,7 +14,7 @@ import io.wispforest.gadget.client.log.ChatLogAppender;
 import io.wispforest.gadget.client.nbt.StackComponentDataScreen;
 import io.wispforest.gadget.client.resource.ViewResourcesScreen;
 import io.wispforest.gadget.mappings.MappingsManager;
-import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
+import io.wispforest.gadget.mixin.client.AbstractContainerScreenAccessor;
 import io.wispforest.gadget.network.BlockEntityTarget;
 import io.wispforest.gadget.network.EntityTarget;
 import io.wispforest.gadget.network.GadgetNetworking;
@@ -208,7 +208,7 @@ public class GadgetClient implements ClientModInitializer {
                         * (double)client.getWindow().getGuiScaledWidth() / (double)client.getWindow().getScreenWidth();
                     double mouseY = client.mouseHandler.ypos()
                         * (double)client.getWindow().getGuiScaledHeight() / (double)client.getWindow().getScreenHeight();
-                    var slot = ((HandledScreenAccessor) handled).callGetSlotAt(mouseX, mouseY);
+                    var slot = ((AbstractContainerScreenAccessor) handled).callGetHoveredSlot(mouseX, mouseY);
 
                     if (slot == null) return true;
                     if (slot instanceof CreativeModeInventoryScreen.CustomCreativeSlot) return true;
