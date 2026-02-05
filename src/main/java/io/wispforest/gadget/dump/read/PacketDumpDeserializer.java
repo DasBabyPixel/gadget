@@ -35,7 +35,7 @@ import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.LoginProtocols;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.status.StatusProtocols;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,7 +72,7 @@ public class PacketDumpDeserializer {
 
         FriendlyByteBuf buf = PacketByteBufs.create();
 
-        Int2ObjectMap<ResourceLocation> loginQueryChannels = new Int2ObjectOpenHashMap<>();
+        Int2ObjectMap<Identifier> loginQueryChannels = new Int2ObjectOpenHashMap<>();
         RegistryAccess registries = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
         try {
@@ -104,7 +104,7 @@ public class PacketDumpDeserializer {
                 ProtocolInfo<?> state = createState(phase, outbound ? PacketFlow.SERVERBOUND : PacketFlow.CLIENTBOUND, registries);
 
                 Packet<?> packet = PacketDumping.readPacket(buf, state);
-                ResourceLocation channelId = NetworkUtil.getChannelOrNull(packet);
+                Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
                 if (packet instanceof ClientboundCustomQueryPacket req) {
                     loginQueryChannels.put(req.transactionId(), req.payload().id());

@@ -1,23 +1,21 @@
  package io.wispforest.gadget.dump.read.handler;
 
-import io.wispforest.gadget.dump.read.unwrapped.FieldsUnwrappedPacket;
-import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
-import io.wispforest.gadget.mixin.owo.*;
-import io.wispforest.gadget.util.ErrorSink;
-import io.wispforest.gadget.util.NetworkUtil;
-import io.wispforest.owo.network.OwoHandshake;
-import io.wispforest.owo.particles.systems.ParticleSystemController;
-import org.jetbrains.annotations.Nullable;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.OptionalInt;
-import java.util.function.Consumer;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
+ import io.wispforest.gadget.dump.read.unwrapped.FieldsUnwrappedPacket;
+ import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
+ import io.wispforest.gadget.mixin.owo.*;
+ import io.wispforest.gadget.util.ErrorSink;
+ import io.wispforest.owo.network.OwoHandshake;
+ import io.wispforest.owo.particles.systems.ParticleSystemController;
+ import java.lang.reflect.InvocationTargetException;
+ import java.lang.reflect.Method;
+ import java.util.Map;
+ import java.util.OptionalInt;
+ import java.util.function.Consumer;
+ import net.minecraft.ChatFormatting;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.resources.Identifier;
+ import net.minecraft.world.phys.Vec3;
+ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class OwoSupport {
@@ -72,7 +70,7 @@ public final class OwoSupport {
         });
     }
 
-    private static void drawHandshakeMap(Map<ResourceLocation, Integer> data, Component prefix, Consumer<Component> out) {
+    private static void drawHandshakeMap(Map<Identifier, Integer> data, Component prefix, Consumer<Component> out) {
         for (var entry : data.entrySet()) {
             out.accept(Component.literal("")
                 .append(prefix)
@@ -114,9 +112,9 @@ public final class OwoSupport {
         }
     }
 
-    public record HandshakeResponse(Map<ResourceLocation, Integer> requiredChannels,
-                                    Map<ResourceLocation, Integer> requiredControllers,
-                                    Map<ResourceLocation, Integer> optionalChannels) implements LinesUnwrappedPacket {
+    public record HandshakeResponse(Map<Identifier, Integer> requiredChannels,
+                                    Map<Identifier, Integer> requiredControllers,
+                                    Map<Identifier, Integer> optionalChannels) implements LinesUnwrappedPacket {
         @Override
         public void render(Consumer<Component> out, ErrorSink errSink) {
             drawHandshakeMap(requiredChannels, Component.literal("r ").withStyle(ChatFormatting.RED), out);

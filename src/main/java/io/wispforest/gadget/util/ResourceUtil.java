@@ -3,7 +3,7 @@ package io.wispforest.gadget.util;
 import io.wispforest.gadget.pond.MixinState;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
@@ -12,7 +12,7 @@ public class ResourceUtil {
 
     }
 
-    public static Map<ResourceLocation, List<Resource>> collectAllResources(ResourceManager manager) {
+    public static Map<Identifier, List<Resource>> collectAllResources(ResourceManager manager) {
         try {
             MixinState.IS_IGNORING_ERRORS.set(true);
             return manager.listResourceStacks("", x -> true);

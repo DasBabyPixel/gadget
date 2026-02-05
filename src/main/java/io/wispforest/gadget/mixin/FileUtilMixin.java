@@ -2,7 +2,7 @@ package io.wispforest.gadget.mixin;
 
 import com.mojang.serialization.DataResult;
 import java.util.List;
-import net.minecraft.FileUtil;
+import net.minecraft.util.FileUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

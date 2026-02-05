@@ -2,10 +2,10 @@ package io.wispforest.gadget.client.gui;
 
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.component.BoxComponent;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import java.util.function.LongSupplier;
 import net.minecraft.client.Minecraft;
@@ -28,19 +28,19 @@ public class ProgressToastImpl implements Toast, ProgressToast {
     private Visibility visibility = Visibility.SHOW;
 
     public ProgressToastImpl(Component headText) {
-        this.adapter = OwoUIAdapter.createWithoutScreen(0, 0, 160, 32, Containers::verticalFlow);
+        this.adapter = OwoUIAdapter.createWithoutScreen(0, 0, 160, 32, UIContainers::verticalFlow);
 
         var root = this.adapter.rootComponent;
 
         root
-            .child(Components.label(headText)
+            .child(UIComponents.label(headText)
                 .maxWidth(160)
                 .horizontalTextAlignment(HorizontalAlignment.CENTER)
                 .margins(Insets.bottom(0)))
-            .child(stepLabel = Components.label(Component.empty())
+            .child(stepLabel = UIComponents.label(Component.empty())
                 .maxWidth(160)
                 .horizontalTextAlignment(HorizontalAlignment.CENTER))
-            .child((progressBox = Components.box(Sizing.fixed(0), Sizing.fixed(3)))
+            .child((progressBox = UIComponents.box(Sizing.fixed(0), Sizing.fixed(3)))
                 .color(Color.WHITE)
                 .fill(true)
                 .positioning(Positioning.absolute(0, 15)))

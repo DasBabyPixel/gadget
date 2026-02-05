@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.network.EventLoopGroupHolder;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,7 +59,8 @@ public abstract class OnlineServerEntryMixin {
                                         : ServerData.State.INCOMPATIBLE
                                 );
                             this.minecraft.execute(this::refreshStatus);
-                        }
+                        },
+                        EventLoopGroupHolder.remote(this.minecraft.options.useNativeTransport())
                     );
                 } catch (UnknownHostException var2x) {
                     this.serverData.ping = -1L;

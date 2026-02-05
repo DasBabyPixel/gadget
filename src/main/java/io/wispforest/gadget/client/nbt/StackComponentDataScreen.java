@@ -6,13 +6,14 @@ import io.wispforest.gadget.client.gui.SidebarBuilder;
 import io.wispforest.gadget.network.GadgetNetworking;
 import io.wispforest.gadget.network.packet.c2s.ReplaceStackC2SPacket;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.Observable;
+import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -22,14 +23,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.Slot;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
     private final NbtDataIsland island;
@@ -83,7 +79,7 @@ public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
 
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::verticalFlow);
+        return OwoUIAdapter.create(this, UIContainers::verticalFlow);
     }
 
     @Override
@@ -94,9 +90,9 @@ public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT);
 
 
-        FlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
+        FlowLayout main = UIContainers.verticalFlow(Sizing.fill(100), Sizing.content());
 
-        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
+        ScrollContainer<FlowLayout> scroll = UIContainers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         rootComponent.child(scroll.child(main));
@@ -106,11 +102,11 @@ public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
 
         main.child(island);
 
-        FlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        FlowLayout sidebar = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
 
         if (island.reloader != null) {
-            var addButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16))
-                .child(Components.label(Component.literal("+"))
+            var addButton = UIContainers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16))
+                .child(UIComponents.label(Component.literal("+"))
                     .verticalTextAlignment(VerticalAlignment.CENTER)
                     .horizontalTextAlignment(HorizontalAlignment.CENTER)
                     .positioning(Positioning.absolute(5, 4))

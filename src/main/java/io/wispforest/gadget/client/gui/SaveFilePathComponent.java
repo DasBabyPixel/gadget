@@ -1,20 +1,19 @@
 package io.wispforest.gadget.client.gui;
 
 import io.wispforest.gadget.client.DialogUtil;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.util.Observable;
-import org.lwjgl.glfw.GLFW;
-
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 public class SaveFilePathComponent extends FlowLayout {
     private final String title;
@@ -28,7 +27,7 @@ public class SaveFilePathComponent extends FlowLayout {
         this.title = title;
         this.path = Observable.of(defaultPath);
 
-        this.label = Components.label(Component.literal("breh"));
+        this.label = UIComponents.label(Component.literal("breh"));
 
         this.configureLabel(defaultPath);
         path.observe(this::configureLabel);

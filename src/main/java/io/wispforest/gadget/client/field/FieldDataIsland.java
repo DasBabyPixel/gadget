@@ -14,13 +14,11 @@ import io.wispforest.gadget.network.FieldData;
 import io.wispforest.gadget.path.FieldPathStep;
 import io.wispforest.gadget.path.ObjectPath;
 import io.wispforest.gadget.path.PathStep;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
-import org.lwjgl.glfw.GLFW;
-
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -30,6 +28,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import org.lwjgl.glfw.GLFW;
 
 public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
     private final FlowLayout mainContainer;
@@ -41,7 +40,7 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
 
         init();
 
-        this.mainContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        this.mainContainer = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
 
         addChildrenTo(mainContainer, root.childrenOrNull());
     }
@@ -54,10 +53,10 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
     protected ClientFieldDataNode createNodeFrom(ObjectPath path, FieldData data) {
         ClientFieldDataNode node = new ClientFieldDataNode(this, path, data);
 
-        node.containerComponent = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        node.containerComponent = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
 
         if (path.steps().length > 0) {
-            var row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+            var row = UIContainers.horizontalFlow(Sizing.content(), Sizing.content());
 
             node.containerComponent.child(row);
 
@@ -78,7 +77,7 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
                 .append(Component.literal(data.obj().type().charAt(0) + " ")
                     .withStyle(x -> x.withColor(data.obj().color())))
                 .append(nameText);
-            var rowLabel = Components.label(rowText);
+            var rowLabel = UIComponents.label(rowText);
 
             row.child(rowLabel);
 
@@ -145,7 +144,7 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
                         .sizing(Sizing.fixed(10), Sizing.content()));
 
                 if (source.isMutable()) {
-                    var plusLabel = Components.label(Component.nullToEmpty("+"));
+                    var plusLabel = UIComponents.label(Component.nullToEmpty("+"));
 
                     GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->
                         island.typeSelector(

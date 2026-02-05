@@ -2,19 +2,18 @@ package io.wispforest.gadget.client.nbt;
 
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.TabTextBoxComponent;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.TextBoxComponent;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Sizing;
+import java.util.function.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.function.Predicate;
 
 public class KeyAdderWidget extends FlowLayout {
     private final NbtDataIsland island;
@@ -34,24 +33,24 @@ public class KeyAdderWidget extends FlowLayout {
         this.type = type;
         this.nameVerifier = nameVerifier;
 
-        child(Components.label(island.typeText(type, "")
+        child(UIComponents.label(island.typeText(type, "")
             .append(" ")));
         child((this.nameField = new TabTextBoxComponent(Sizing.fixed(75)))
             .verticalSizing(Sizing.fixed(8)));
 
         if (typeNeedsValue(type)) {
-            child(Components.label(Component.nullToEmpty(" = ")));
+            child(UIComponents.label(Component.nullToEmpty(" = ")));
 
             child((this.valueField = new TabTextBoxComponent(Sizing.fixed(75)))
                 .verticalSizing(Sizing.fixed(8)));
         } else if (typeNeedsSize(type)) {
-            child(Components.label(Component.nullToEmpty("["))
+            child(UIComponents.label(Component.nullToEmpty("["))
                 .margins(Insets.horizontal(2)));
 
             child((this.valueField = new TabTextBoxComponent(Sizing.fixed(50)))
                 .verticalSizing(Sizing.fixed(8)));
 
-            child(Components.label(Component.nullToEmpty("]"))
+            child(UIComponents.label(Component.nullToEmpty("]"))
                 .margins(Insets.horizontal(2)));
         } else {
             this.valueField = null;
@@ -70,7 +69,7 @@ public class KeyAdderWidget extends FlowLayout {
     }
 
     @Override
-    public void mount(ParentComponent parent, int x, int y) {
+    public void mount(ParentUIComponent parent, int x, int y) {
         super.mount(parent, x, y);
 
         if (!wasMounted) {

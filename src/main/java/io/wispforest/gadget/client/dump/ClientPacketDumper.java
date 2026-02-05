@@ -4,20 +4,19 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.NotificationToast;
 import io.wispforest.gadget.dump.fake.GadgetDynamicRegistriesPacket;
 import io.wispforest.gadget.dump.write.PacketDumpWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.ProtocolInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
+import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class ClientPacketDumper {
 

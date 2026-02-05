@@ -1,7 +1,15 @@
 package io.wispforest.gadget.util;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
@@ -11,14 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 
 public final class PrettyPrinters {
     private static final Map<Class<?>, Function<Object, String>> PRINTERS = new HashMap<>();
@@ -56,7 +56,7 @@ public final class PrettyPrinters {
             AtomicBoolean.class, AtomicInteger.class, AtomicLong.class,
 
             // Minecraft classes
-            BlockState.class, FluidState.class, Level.class, ResourceLocation.class);
+            BlockState.class, FluidState.class, Level.class, Identifier.class);
 
         register(x -> "\"" + x + "\"", String.class);
 

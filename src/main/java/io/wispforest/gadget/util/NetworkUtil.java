@@ -7,14 +7,14 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class NetworkUtil {
     private NetworkUtil() {
 
     }
 
-    public static ResourceLocation getChannelOrNull(Packet<?> packet) {
+    public static Identifier getChannelOrNull(Packet<?> packet) {
         return switch (packet) {
             case ClientboundCustomPayloadPacket pkt -> pkt.payload().type().id();
             case ServerboundCustomPayloadPacket pkt -> pkt.payload().type().id();

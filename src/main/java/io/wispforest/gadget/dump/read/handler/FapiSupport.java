@@ -2,7 +2,9 @@ package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.util.ErrorSink;
-import io.wispforest.gadget.util.NetworkUtil;
+import java.util.Arrays;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import net.fabricmc.fabric.impl.networking.CommonRegisterPayload;
 import net.fabricmc.fabric.impl.networking.CommonVersionPayload;
 import net.fabricmc.fabric.impl.networking.RegistrationPayload;
@@ -10,10 +12,7 @@ import net.fabricmc.fabric.impl.recipe.ingredient.CustomIngredientPayloadC2S;
 import net.fabricmc.fabric.impl.recipe.ingredient.CustomIngredientPayloadS2C;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import java.util.Arrays;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import net.minecraft.resources.Identifier;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class FapiSupport {
@@ -62,7 +61,7 @@ public final class FapiSupport {
                 : Component.literal("- ")
                 .withStyle(ChatFormatting.RED);
 
-            for (ResourceLocation channel : payload.channels()) {
+            for (Identifier channel : payload.channels()) {
                 out.accept(
                     Component.literal("")
                         .append(header)
@@ -95,7 +94,7 @@ public final class FapiSupport {
                 .append(Component.literal(" = " + payload.phase())
                     .withStyle(ChatFormatting.GRAY)));
 
-            for (ResourceLocation channel : payload.channels()) {
+            for (Identifier channel : payload.channels()) {
                 out.accept(
                     Component.literal("+ ")
                         .withStyle(ChatFormatting.GREEN)
@@ -121,7 +120,7 @@ public final class FapiSupport {
                 .append(Component.literal(" = " + payload.protocolVersion())
                     .withStyle(ChatFormatting.GRAY)));
 
-            for (ResourceLocation serializer : payload.registeredSerializers()) {
+            for (Identifier serializer : payload.registeredSerializers()) {
                 out.accept(
                     Component.literal("+ ")
                         .withStyle(ChatFormatting.GREEN)

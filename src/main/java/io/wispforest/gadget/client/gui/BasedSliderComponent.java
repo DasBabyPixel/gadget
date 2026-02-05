@@ -2,7 +2,7 @@ package io.wispforest.gadget.client.gui;
 
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.SliderComponent;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import java.util.ArrayList;
@@ -28,11 +28,11 @@ public class BasedSliderComponent extends SliderComponent {
 
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        NinePatchTexture.draw(ButtonComponent.DISABLED_TEXTURE, (OwoUIDrawContext) ctx, getX(), getY(), width, height);
+        NinePatchTexture.draw(ButtonComponent.DISABLED_TEXTURE, (OwoUIGraphics) ctx, getX(), getY(), width, height);
 
         NinePatchTexture.draw(
             (isHovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE),
-            (OwoUIDrawContext) ctx,
+            (OwoUIGraphics) ctx,
             this.getX() + (int)(this.value * (double)(this.width - 8)),
             getY(),
             8,
@@ -40,7 +40,12 @@ public class BasedSliderComponent extends SliderComponent {
         );
 
         int textColor = this.active ? 16777215 : 10526880;
-        this.renderScrollingString(ctx, Minecraft.getInstance().font, 2, textColor | Mth.ceil(this.alpha * 255.0F) << 24);
+        int marginX = 2;
+        this.renderScrollingStringOverContents(
+                ctx.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE),
+                this.getMessage().copy().withColor(textColor),
+                marginX
+        );
     }
 
     @Override
@@ -54,7 +59,7 @@ public class BasedSliderComponent extends SliderComponent {
     }
 
     @Override
-    public void drawTooltip(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void drawTooltip(OwoUIGraphics ctx, int mouseX, int mouseY, float partialTicks, float delta) {
         if (!shouldDrawTooltip(mouseX, mouseY)) return;
         if (tooltipFactory == null) return;
 

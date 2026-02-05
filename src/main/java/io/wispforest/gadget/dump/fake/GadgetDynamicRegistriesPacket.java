@@ -17,8 +17,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagNetworkSerialization;
 
 public record GadgetDynamicRegistriesPacket(
@@ -27,8 +27,8 @@ public record GadgetDynamicRegistriesPacket(
 ) implements FakeGadgetPacket {
     public static final int ID = -3;
 
-    private static final StreamCodec<ByteBuf, ResourceKey<? extends Registry<?>>> REGISTRY_KEY_CODEC = ResourceLocation.STREAM_CODEC
-        .map(ResourceKey::createRegistryKey, ResourceKey::location);
+    private static final StreamCodec<ByteBuf, ResourceKey<? extends Registry<?>>> REGISTRY_KEY_CODEC = Identifier.STREAM_CODEC
+        .map(ResourceKey::createRegistryKey, ResourceKey::identifier);
 
     private static final StreamCodec<FriendlyByteBuf, TagNetworkSerialization.NetworkPayload> TAG_SERIALIZED_CODEC = StreamCodec.ofMember(
         TagNetworkSerialization.NetworkPayload::write,

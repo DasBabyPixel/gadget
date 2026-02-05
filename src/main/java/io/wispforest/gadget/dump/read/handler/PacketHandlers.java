@@ -5,14 +5,13 @@ import io.wispforest.gadget.dump.fake.FakeGadgetPacket;
 import io.wispforest.gadget.dump.read.UnwrappedPacketData;
 import io.wispforest.gadget.dump.read.unwrapped.CustomPayloadUnwrappedPacket;
 import io.wispforest.gadget.dump.read.unwrapped.VanillaUnwrappedPacket;
-import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.gadget.util.ReflectionUtil;
 import net.fabricmc.fabric.api.event.Event;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class PacketHandlers {
-    public static final ResourceLocation FIRST_PHASE = Gadget.id("first");
-    public static final ResourceLocation LAST_PHASE = Gadget.id("last");
+    public static final Identifier FIRST_PHASE = Gadget.id("first");
+    public static final Identifier LAST_PHASE = Gadget.id("last");
 
 
     private PacketHandlers() {

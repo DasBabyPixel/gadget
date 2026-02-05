@@ -1,9 +1,9 @@
 package io.wispforest.gadget.client.gui;
 
-import io.wispforest.owo.ui.container.WrappingParentComponent;
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.container.WrappingParentUIComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.UIComponent;
 import net.minecraft.client.input.MouseButtonEvent;
 
 /**
@@ -11,9 +11,9 @@ import net.minecraft.client.input.MouseButtonEvent;
  * <p> Mainly used to make {@link io.wispforest.owo.ui.container.OverlayContainer} think that the click was inside the box
  * and not close.
  *
- * @param <C> Wrapped {@link Component} type.
+ * @param <C> Wrapped {@link UIComponent} type.
  */
-public class EventEaterWrapper<C extends Component> extends WrappingParentComponent<C> {
+public class EventEaterWrapper<C extends UIComponent> extends WrappingParentUIComponent<C> {
     public EventEaterWrapper(C child) {
         super(Sizing.content(), Sizing.content(), child);
     }
@@ -29,7 +29,7 @@ public class EventEaterWrapper<C extends Component> extends WrappingParentCompon
     }
 
     @Override
-    public void draw(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIGraphics ctx, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(ctx, mouseX, mouseY, partialTicks, delta);
 
         this.drawChildren(ctx, mouseX, mouseY, partialTicks, delta, children());

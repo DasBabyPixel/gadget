@@ -37,7 +37,7 @@ public abstract class KeyboardHandlerMixin {
             cir.setReturnValue(false);
     }
 
-    @Inject(method = "handleDebugKeys", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;hasPermissions(I)Z"), cancellable = true)
+    @Inject(method = "handleDebugKeys", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/permissions/PermissionCheck;check(Lnet/minecraft/server/permissions/PermissionSet;)Z"), cancellable = true)
     private void leaveOnGameModeSelection(KeyEvent keyEvent, CallbackInfoReturnable<Boolean> cir) {
         if (minecraft.player == null)
             cir.setReturnValue(false);

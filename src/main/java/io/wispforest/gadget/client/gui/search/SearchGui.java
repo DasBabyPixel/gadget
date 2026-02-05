@@ -4,23 +4,22 @@
 package io.wispforest.gadget.client.gui.search;
 
 import blue.endless.jankson.annotation.Nullable;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.TextBoxComponent;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.Surface;
-import org.lwjgl.glfw.GLFW;
-
 import java.util.*;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import org.lwjgl.glfw.GLFW;
 
 public class SearchGui extends FlowLayout {
     private final ScrollContainer<?> scroll;
@@ -33,12 +32,12 @@ public class SearchGui extends FlowLayout {
         super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
         this.scroll = scroll;
 
-        var searchRow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+        var searchRow = UIContainers.horizontalFlow(Sizing.content(), Sizing.content());
 
-        searchBox = Components.textBox(Sizing.fill(50));
+        searchBox = UIComponents.textBox(Sizing.fill(50));
         searchBox.setBordered(false);
         searchBox.verticalSizing(Sizing.fixed(9));
-        LabelComponent matchIndicator = Components.label(Component.empty());
+        LabelComponent matchIndicator = UIComponents.label(Component.empty());
         matchIndicator.margins(Insets.horizontal(5));
 
         searchRow
@@ -48,8 +47,8 @@ public class SearchGui extends FlowLayout {
             .padding(Insets.of(3));
 
         this
-            .child(Components.texture(
-                    ResourceLocation.fromNamespaceAndPath("owo", "textures/gui/config_search.png"),
+            .child(UIComponents.texture(
+                    Identifier.fromNamespaceAndPath("owo", "textures/gui/config_search.png"),
                     0,
                     0,
                     16,
@@ -123,7 +122,7 @@ public class SearchGui extends FlowLayout {
 
         while (!candidates.isEmpty()) {
             var candidate = candidates.poll();
-            if (candidate instanceof ParentComponent parentComponent) {
+            if (candidate instanceof ParentUIComponent parentComponent) {
                 candidates.addAll(parentComponent.children());
             } else if (candidate instanceof SearchAnchorComponent anchor) {
                 discovered.add(anchor);

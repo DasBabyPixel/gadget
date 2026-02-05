@@ -2,19 +2,18 @@ package io.wispforest.gadget.client.nbt;
 
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.TabTextBoxComponent;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.TextBoxComponent;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
-import org.lwjgl.glfw.GLFW;
-
 import java.util.function.Function;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 public class PrimitiveEditorWidget extends FlowLayout {
     private final NbtDataIsland island;
@@ -31,13 +30,13 @@ public class PrimitiveEditorWidget extends FlowLayout {
         this.island = island;
         this.path = path;
 
-        this.contentsLabel = Components.label(
+        this.contentsLabel = UIComponents.label(
             Component.literal(value.toString())
                 .withStyle(ChatFormatting.GRAY)
         );
         this.value = value;
         this.parser = parser;
-        this.editLabel = Components.label(Component.literal(" ✎ "));
+        this.editLabel = UIComponents.label(Component.literal(" ✎ "));
         this.editField = new TabTextBoxComponent(Sizing.fixed(100));
 
         GuiUtil.semiButton(this.editLabel, this::startEditing);

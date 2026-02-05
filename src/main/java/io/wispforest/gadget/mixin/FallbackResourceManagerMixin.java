@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.pond.MixinState;
 import java.util.Collection;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.FallbackResourceManager;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(FallbackResourceManager.class)
 public class FallbackResourceManagerMixin {
     @WrapOperation(method = "listPackResources", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/PackResources;listResources(Lnet/minecraft/server/packs/PackType;Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/server/packs/PackResources$ResourceOutput;)V"))
-    private void ignoreErrorsIfNeeded(PackResources pack, PackType type, String namespace, String prefix, PackResources.ResourceOutput consumer, Operation<Collection<ResourceLocation>> original) {
+    private void ignoreErrorsIfNeeded(PackResources pack, PackType type, String namespace, String prefix, PackResources.ResourceOutput consumer, Operation<Collection<Identifier>> original) {
         if (MixinState.IS_IGNORING_ERRORS.get() != null) {
             try {
                 original.call(pack, type, namespace, prefix, consumer);

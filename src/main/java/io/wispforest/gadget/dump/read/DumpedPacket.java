@@ -4,17 +4,17 @@ import io.wispforest.gadget.util.ContextData;
 import io.wispforest.gadget.util.NetworkUtil;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class DumpedPacket extends ContextData<DumpedPacket> {
     private final boolean outbound;
     private final ConnectionProtocol phase;
     private final Packet<?> packet;
-    private final ResourceLocation channelId;
+    private final Identifier channelId;
     private final long sentAt;
     private final int size;
 
-    public DumpedPacket(boolean outbound, ConnectionProtocol phase, Packet<?> packet, ResourceLocation channelId, long sentAt,
+    public DumpedPacket(boolean outbound, ConnectionProtocol phase, Packet<?> packet, Identifier channelId, long sentAt,
                         int size) {
         this.outbound = outbound;
         this.phase = phase;
@@ -50,7 +50,7 @@ public final class DumpedPacket extends ContextData<DumpedPacket> {
         return NetworkUtil.unwrapCustom(packet);
     }
 
-    public ResourceLocation channelId() {
+    public Identifier channelId() {
         return channelId;
     }
 

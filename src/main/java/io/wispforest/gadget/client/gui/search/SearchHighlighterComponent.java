@@ -3,10 +3,10 @@
 
 package io.wispforest.gadget.client.gui.search;
 
-import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.base.BaseUIComponent;
 import io.wispforest.owo.ui.core.*;
 
-public class SearchHighlighterComponent extends BaseComponent {
+public class SearchHighlighterComponent extends BaseUIComponent {
 
     private final Color startColor = Color.ofArgb(0x008d9be0);
     private final Color endColor = Color.ofArgb(0x4c8d9be0);
@@ -19,7 +19,7 @@ public class SearchHighlighterComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIGraphics ctx, int mouseX, int mouseY, float partialTicks, float delta) {
         final var mainColor = startColor.interpolate(endColor, (float) Math.sin(age / 25 * Math.PI)).argb();
 
         int segmentWidth = (int) (this.width * .3f);

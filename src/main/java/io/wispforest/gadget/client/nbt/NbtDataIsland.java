@@ -3,23 +3,22 @@ package io.wispforest.gadget.client.nbt;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
 import io.wispforest.gadget.mixin.TagTypesAccessor;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class NbtDataIsland extends FlowLayout {
     private final Map<NbtPath, WidgetData> elements = new HashMap<>();
@@ -39,8 +38,8 @@ public class NbtDataIsland extends FlowLayout {
     }
 
     void makeComponent(NbtPath path, Tag element) {
-        FlowLayout full = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        FlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+        FlowLayout full = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
+        FlowLayout row = UIContainers.horizontalFlow(Sizing.content(), Sizing.content());
         full.child(row);
 
         var parentContainer = subContainerOf(path.parent());
@@ -66,7 +65,7 @@ public class NbtDataIsland extends FlowLayout {
         elements.put(path, widgetData);
 
         MutableComponent rowText = Component.literal("");
-        LabelComponent label = Components.label(rowText);
+        LabelComponent label = UIComponents.label(rowText);
 
         row.child(label);
 
@@ -123,7 +122,7 @@ public class NbtDataIsland extends FlowLayout {
             }
 
             if (reloader != null) {
-                var plusLabel = Components.label(Component.nullToEmpty("+ "));
+                var plusLabel = UIComponents.label(Component.nullToEmpty("+ "));
 
                 GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->
                     typeSelector(
@@ -149,7 +148,7 @@ public class NbtDataIsland extends FlowLayout {
             }
 
             if (reloader != null) {
-                var plusLabel = Components.label(Component.nullToEmpty("+ "));
+                var plusLabel = UIComponents.label(Component.nullToEmpty("+ "));
                 Predicate<String> nameVerifier = name -> {
                     try {
                         var index = Integer.parseInt(name);
@@ -185,7 +184,7 @@ public class NbtDataIsland extends FlowLayout {
         FlowLayout target = subContainerOf(path.parent());
 
         if (reloader != null) {
-            var crossLabel = Components.label(Component.literal("❌"));
+            var crossLabel = UIComponents.label(Component.literal("❌"));
             GuiUtil.semiButton(crossLabel, () -> {
                 path.remove(data);
                 reloader.accept(data);
@@ -196,7 +195,7 @@ public class NbtDataIsland extends FlowLayout {
             row.child(crossLabel);
         }
 
-        var copyLabel = Components.label(Component.literal("C"));
+        var copyLabel = UIComponents.label(Component.literal("C"));
         copyLabel.tooltip(Component.translatable("chat.copy.click"));
         GuiUtil.semiButton(copyLabel, () -> {
              Minecraft.getInstance().keyboardHandler.setClipboard(path.follow(data).toString());

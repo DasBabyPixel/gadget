@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -17,7 +17,7 @@ public class GadgetTestmodClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        Registry.register(BuiltInRegistries.ITEM, ResourceLocation.fromNamespaceAndPath("gadget-testmod", "funny"), FUNNY_ITEM);
+        Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath("gadget-testmod", "funny"), FUNNY_ITEM);
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(literal("gadget-testmod")

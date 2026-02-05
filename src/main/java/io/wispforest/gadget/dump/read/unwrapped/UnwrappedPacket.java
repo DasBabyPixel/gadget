@@ -2,7 +2,7 @@ package io.wispforest.gadget.dump.read.unwrapped;
 
 import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.FormattedDumper;
-import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,6 +31,6 @@ public interface UnwrappedPacket {
 
     @Environment(EnvType.CLIENT)
     default void render(FlowLayout out, ErrorSink errSink) {
-        out.child(Components.label(Component.translatable("text.gadget.deserialized_packet_no_render", getClass().getName())));
+        out.child(UIComponents.label(Component.translatable("text.gadget.deserialized_packet_no_render", getClass().getName())));
     }
 }

@@ -15,21 +15,12 @@ import io.wispforest.gadget.path.PathStep;
 import io.wispforest.gadget.util.FormattedDumper;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.OverlayContainer;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -39,6 +30,14 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
     private final InspectionTarget target;
@@ -72,7 +71,7 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
 
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::verticalFlow);
+        return OwoUIAdapter.create(this, UIContainers::verticalFlow);
     }
 
     @Override
@@ -83,9 +82,9 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT);
 
 
-        FlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
+        FlowLayout main = UIContainers.verticalFlow(Sizing.fill(100), Sizing.content());
 
-        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
+        ScrollContainer<FlowLayout> scroll = UIContainers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         verticalFlowLayout.child(scroll.child(main));
@@ -126,7 +125,7 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
 
             uiAdapter.rootComponent.focusHandler().focus(
                 search.searchBox(),
-                io.wispforest.owo.ui.core.Component.FocusSource.MOUSE_CLICK
+                io.wispforest.owo.ui.core.UIComponent.FocusSource.MOUSE_CLICK
             );
 
             return true;
@@ -136,14 +135,14 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     public void openExportModal() {
-        FlowLayout exportModal = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        OverlayContainer<EventEaterWrapper<FlowLayout>> exportOverlay = Containers.overlay(new EventEaterWrapper<>(exportModal));
+        FlowLayout exportModal = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
+        OverlayContainer<EventEaterWrapper<FlowLayout>> exportOverlay = UIContainers.overlay(new EventEaterWrapper<>(exportModal));
 
         exportModal
             .surface(Surface.DARK_PANEL)
             .padding(Insets.of(8));
 
-        exportModal.child(Components.label(Component.translatable("text.gadget.export.packet_dump"))
+        exportModal.child(UIComponents.label(Component.translatable("text.gadget.export.packet_dump"))
             .margins(Insets.bottom(4)));
 
         SaveFilePathComponent savePath =
@@ -154,13 +153,13 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
             .patterns(List.of("*.txt", "*.json"))
             .filterDescription("Plain text/JSON file");
 
-        exportModal.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
-            .child(Components.label(Component.translatable("text.gadget.export.output_path")))
+        exportModal.child(UIContainers.horizontalFlow(Sizing.content(), Sizing.content())
+            .child(UIComponents.label(Component.translatable("text.gadget.export.output_path")))
             .child(savePath)
             .verticalAlignment(VerticalAlignment.CENTER)
         );
 
-        var button = Components.button(Component.translatable("text.gadget.export.export_button"), b -> {
+        var button = UIComponents.button(Component.translatable("text.gadget.export.export_button"), b -> {
             var path = Path.of(savePath.path().get());
 
             exportOverlay.remove();

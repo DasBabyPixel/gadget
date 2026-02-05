@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.function.Function;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -30,7 +30,7 @@ public record SimpleMapPathStepType(Function<String, Object> fromImpl, Function<
     }
 
     private static <T> void registerForRegistry(Class<T> klass, Registry<T> registry) {
-        register(registry.key().location().toString(), klass, x -> registry.getValue(ResourceLocation.parse(x)), x -> registry.getKey(x).toString());
+        register(registry.key().identifier().toString(), klass, x -> registry.getValue(Identifier.parse(x)), x -> registry.getKey(x).toString());
     }
 
     public static SimpleMapPathStepType getFor(Class<?> klass) {
@@ -40,7 +40,7 @@ public record SimpleMapPathStepType(Function<String, Object> fromImpl, Function<
     static {
         register("int", Integer.class, Integer::parseInt, Object::toString);
         register("string", String.class, x -> x, String::toString);
-        register("identifier", ResourceLocation.class, ResourceLocation::parse, ResourceLocation::toString);
+        register("identifier", Identifier.class, Identifier::parse, Identifier::toString);
 
         registerForRegistry(Block.class, BuiltInRegistries.BLOCK);
         registerForRegistry(Item.class, BuiltInRegistries.ITEM);

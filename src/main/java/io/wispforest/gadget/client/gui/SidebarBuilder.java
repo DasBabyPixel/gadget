@@ -1,9 +1,9 @@
 package io.wispforest.gadget.client.gui;
 
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.network.chat.Component;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 public class SidebarBuilder {
-    private final FlowLayout layout = Containers.verticalFlow(Sizing.content(), Sizing.content());
+    private final FlowLayout layout = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
 
     {
         layout
@@ -49,7 +49,7 @@ public class SidebarBuilder {
         public Button(Component icon, Component tooltip) {
             super(Sizing.fixed(16), Sizing.fixed(16), Algorithm.VERTICAL);
 
-            child((iconLabel = Components.label(icon))
+            child((iconLabel = UIComponents.label(icon))
                 .verticalTextAlignment(VerticalAlignment.CENTER)
                 .horizontalTextAlignment(HorizontalAlignment.CENTER)
                 .positioning(Positioning.absolute(5, 4))

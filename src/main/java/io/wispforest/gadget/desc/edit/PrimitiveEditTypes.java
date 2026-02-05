@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -37,7 +37,7 @@ public final class PrimitiveEditTypes {
     }
 
     public static <T> void registerForRegistry(Class<T> klass, Registry<T> registry) {
-        register(registry.key().location().toString(), klass, new RegistryEditType<>(registry));
+        register(registry.key().identifier().toString(), klass, new RegistryEditType<>(registry));
     }
 
     @SuppressWarnings("unchecked")
@@ -53,7 +53,7 @@ public final class PrimitiveEditTypes {
         registerSimple("float", Float.class, Float::parseFloat, Object::toString);
         registerSimple("double", Double.class, Double::parseDouble, Object::toString);
         registerSimple("string", String.class, x -> x, String::toString);
-        registerSimple("identifier", ResourceLocation.class, ResourceLocation::parse, ResourceLocation::toString);
+        registerSimple("identifier", Identifier.class, Identifier::parse, Identifier::toString);
         registerSimple("uuid", UUID.class, UUID::fromString, UUID::toString);
 
         registerForRegistry(Block.class, BuiltInRegistries.BLOCK);

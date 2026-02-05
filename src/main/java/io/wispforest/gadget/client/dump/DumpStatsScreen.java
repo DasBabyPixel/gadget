@@ -7,14 +7,11 @@ import io.wispforest.gadget.dump.read.SearchTextData;
 import io.wispforest.gadget.util.NumberUtil;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
-import org.apache.commons.lang3.mutable.MutableLong;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +19,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.jetbrains.annotations.NotNull;
 
 public class DumpStatsScreen extends BaseOwoScreen<FlowLayout> {
     private final Map<String, PacketTypeData> packetTypes = new HashMap<>();
@@ -47,7 +46,7 @@ public class DumpStatsScreen extends BaseOwoScreen<FlowLayout> {
 
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::verticalFlow);
+        return OwoUIAdapter.create(this, UIContainers::verticalFlow);
     }
 
     @Override
@@ -58,7 +57,7 @@ public class DumpStatsScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT);
 
         FlowLayout main = new BasedVerticalFlowLayout(Sizing.fill(100), Sizing.content());
-        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
+        ScrollContainer<FlowLayout> scroll = UIContainers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         main.padding(Insets.vertical(15));
@@ -79,7 +78,7 @@ public class DumpStatsScreen extends BaseOwoScreen<FlowLayout> {
                     .append(Component.literal("\n  " + NumberUtil.formatPercent(sizePercent) + " of size"))
                     .append(Component.literal("\n  " + NumberUtil.formatPercent(totalPercent) + " of packets"));
 
-                main.child(Components.label(total)
+                main.child(UIComponents.label(total)
                     .margins(Insets.bottom(3)));
             });
 

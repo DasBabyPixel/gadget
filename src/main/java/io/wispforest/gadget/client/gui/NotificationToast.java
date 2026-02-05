@@ -1,8 +1,8 @@
 package io.wispforest.gadget.client.gui;
 
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -17,12 +17,12 @@ public class NotificationToast implements Toast {
     private Visibility visibility = Visibility.SHOW;
 
     public NotificationToast(Component headText, Component messageText) {
-        this.adapter = OwoUIAdapter.createWithoutScreen(0, 0, 160, 32, Containers::verticalFlow);
+        this.adapter = OwoUIAdapter.createWithoutScreen(0, 0, 160, 32, UIContainers::verticalFlow);
 
         var root = this.adapter.rootComponent;
 
         root
-            .child(Components.label(headText)
+            .child(UIComponents.label(headText)
                 .maxWidth(160)
                 .horizontalTextAlignment(HorizontalAlignment.CENTER))
             .surface(Surface.VANILLA_TRANSLUCENT.and(Surface.outline(0xFF5800FF)))
@@ -32,7 +32,7 @@ public class NotificationToast implements Toast {
             .padding(Insets.of(5));
 
         if (messageText != null)
-            root.child(Components.label(messageText));
+            root.child(UIComponents.label(messageText));
 
         this.adapter.inflateAndMount();
 

@@ -14,15 +14,15 @@ import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSets;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Set;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Set;
 
 public final class GadgetNetworking {
     public static final OwoNetChannel CHANNEL = OwoNetChannel.createOptional(Gadget.id("data"))
@@ -145,7 +145,7 @@ public final class GadgetNetworking {
 
             var resources =
                 ResourceUtil.collectAllResources(access.runtime().getResourceManager());
-            var network = new HashMap<ResourceLocation, Integer>();
+            var network = new HashMap<Identifier, Integer>();
 
             for (var entry : resources.entrySet())
                 network.put(entry.getKey(), entry.getValue().size());

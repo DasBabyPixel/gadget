@@ -5,15 +5,12 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
-import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
-
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -28,29 +25,31 @@ import java.util.function.BiConsumer;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 public class ViewResourcesScreen extends BaseOwoScreen<FlowLayout> {
-    private static final ResourceLocation FILE_TEXTURE_ID = Gadget.id("file_texture");
+    private static final Identifier FILE_TEXTURE_ID = Gadget.id("file_texture");
 
     private final Screen parent;
-    private final Map<ResourceLocation, Integer> resourcePaths;
-    private BiConsumer<ResourceLocation, Integer> resRequester;
+    private final Map<Identifier, Integer> resourcePaths;
+    private BiConsumer<Identifier, Integer> resRequester;
     private DynamicTexture prevTexture;
     private FlowLayout contents;
 
-    public ViewResourcesScreen(Screen parent, Map<ResourceLocation, Integer> resourcePaths) {
+    public ViewResourcesScreen(Screen parent, Map<Identifier, Integer> resourcePaths) {
         this.parent = parent;
         this.resourcePaths = resourcePaths;
     }
 
-    public void resRequester(BiConsumer<ResourceLocation, Integer> resRequester) {
+    public void resRequester(BiConsumer<Identifier, Integer> resRequester) {
         this.resRequester = resRequester;
     }
 
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::horizontalFlow);
+        return OwoUIAdapter.create(this, UIContainers::horizontalFlow);
     }
 
     @Override
@@ -59,11 +58,11 @@ public class ViewResourcesScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT)
             .padding(Insets.of(5));
 
-        FlowLayout tree = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        ScrollContainer<FlowLayout> treeScroll = Containers.verticalScroll(Sizing.fill(25), Sizing.fill(100), tree)
+        FlowLayout tree = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
+        ScrollContainer<FlowLayout> treeScroll = UIContainers.verticalScroll(Sizing.fill(25), Sizing.fill(100), tree)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
-        contents = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        ScrollContainer<FlowLayout> contentsScroll = Containers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
+        contents = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
+        ScrollContainer<FlowLayout> contentsScroll = UIContainers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         rootComponent
@@ -86,13 +85,13 @@ public class ViewResourcesScreen extends BaseOwoScreen<FlowLayout> {
                 SubObjectContainer sub = new SubObjectContainer(unused -> {
                 }, unused -> {
                 });
-                FlowLayout entryContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
-                FlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+                FlowLayout entryContainer = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
+                FlowLayout row = UIContainers.horizontalFlow(Sizing.content(), Sizing.content());
 
                 parent.container
                     .child(entryContainer
                         .child(row
-                            .child(Components.label(Component.literal(split[split.length - 1])))
+                            .child(UIComponents.label(Component.literal(split[split.length - 1])))
                             .child(sub.getSpinnyBoi()
                                 .margins(Insets.left(3))))
                         .child(sub));
@@ -107,9 +106,9 @@ public class ViewResourcesScreen extends BaseOwoScreen<FlowLayout> {
         }
     }
 
-    private FlowLayout makeRecipeRow(String name, ResourceLocation key, int index) {
-        var row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
-        var fileLabel = Components.label(Component.literal(name));
+    private FlowLayout makeRecipeRow(String name, Identifier key, int index) {
+        var row = UIContainers.horizontalFlow(Sizing.content(), Sizing.content());
+        var fileLabel = UIComponents.label(Component.literal(name));
 
         row.child(fileLabel);
         row.mouseEnter().subscribe(
@@ -131,7 +130,7 @@ public class ViewResourcesScreen extends BaseOwoScreen<FlowLayout> {
         return row;
     }
 
-    public void openFile(ResourceLocation id, Callable<InputStream> isGetter) {
+    public void openFile(Identifier id, Callable<InputStream> isGetter) {
         if (prevTexture != null) {
             prevTexture.close();
             prevTexture = null;
@@ -147,7 +146,7 @@ public class ViewResourcesScreen extends BaseOwoScreen<FlowLayout> {
                     minecraft.getTextureManager().register(FILE_TEXTURE_ID, prevTexture);
 
                     contents
-                        .child(Components.texture(
+                        .child(UIComponents.texture(
                             FILE_TEXTURE_ID,
                             0,
                             0,
@@ -155,7 +154,7 @@ public class ViewResourcesScreen extends BaseOwoScreen<FlowLayout> {
                             prevTexture.getPixels().getHeight(),
                             prevTexture.getPixels().getWidth(),
                             prevTexture.getPixels().getHeight()))
-                        .child(Components.label(
+                        .child(UIComponents.label(
                             Component.translatable(
                                 "text.gadget.image_size",
                                 prevTexture.getPixels().getWidth(),
@@ -245,13 +244,13 @@ public class ViewResourcesScreen extends BaseOwoScreen<FlowLayout> {
             SubObjectContainer sub = new SubObjectContainer(unused -> {
             }, unused -> {
             });
-            FlowLayout entryContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
-            FlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+            FlowLayout entryContainer = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
+            FlowLayout row = UIContainers.horizontalFlow(Sizing.content(), Sizing.content());
 
             container
                 .child(entryContainer
                     .child(row
-                        .child(Components.label(Component.literal(name)))
+                        .child(UIComponents.label(Component.literal(name)))
                         .child(sub.getSpinnyBoi()
                             .margins(Insets.left(3))))
                     .child(sub));

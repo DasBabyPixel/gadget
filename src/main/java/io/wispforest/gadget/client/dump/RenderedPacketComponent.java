@@ -14,22 +14,21 @@ import io.wispforest.gadget.dump.read.UnwrappedPacketData;
 import io.wispforest.gadget.util.ContextData;
 import io.wispforest.gadget.util.ReflectionUtil;
 import io.wispforest.owo.ui.container.CollapsibleContainer;
-import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
-import org.apache.commons.lang3.time.DurationFormatUtils;
-
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 public class RenderedPacketComponent {
     public static final ContextData.Key<DumpedPacket, RenderedPacketComponent> KEY = new ContextData.Key<>(RenderedPacketComponent::new);
 
     private final DumpedPacket packet;
-    private SoftReference<Component> component;
+    private SoftReference<UIComponent> component;
     private final List<Throwable> drawErrors = new ArrayList<>();
 
     public RenderedPacketComponent(DumpedPacket packet) {
@@ -40,9 +39,9 @@ public class RenderedPacketComponent {
         return drawErrors;
     }
 
-    public Component component() {
+    public UIComponent component() {
         if (component == null || component.get() == null) {
-            FlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
+            FlowLayout view = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
 
             view
                 .padding(Insets.of(5))
@@ -80,7 +79,7 @@ public class RenderedPacketComponent {
 
             container.toggleExpansion();
 
-            view.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
+            view.child(UIContainers.horizontalFlow(Sizing.content(), Sizing.content())
                 .child(new BasedLabelComponent(typeText))
                 .child(container.getSpinnyBoi())
                 .margins(Insets.bottom(3)));
@@ -92,7 +91,7 @@ public class RenderedPacketComponent {
             if (!drawErrors.isEmpty()
                 || packet.packet() instanceof GadgetReadErrorPacket
                 || packet.packet() instanceof GadgetWriteErrorPacket) {
-                CollapsibleContainer errors = Containers.collapsible(
+                CollapsibleContainer errors = UIContainers.collapsible(
                     Sizing.content(),
                     Sizing.content(),
                     net.minecraft.network.chat.Component.translatable("text.gadget.packet_errors"),
@@ -136,7 +135,7 @@ public class RenderedPacketComponent {
 
             view.child(container);
 
-            FlowLayout fullRow = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
+            FlowLayout fullRow = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content());
 
             fullRow
                 .child(view)

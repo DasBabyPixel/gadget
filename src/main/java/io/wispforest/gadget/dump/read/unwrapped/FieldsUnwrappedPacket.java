@@ -6,16 +6,15 @@ import io.wispforest.gadget.field.LocalFieldDataSource;
 import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.FormattedDumper;
 import io.wispforest.gadget.util.ReflectionUtil;
-import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import java.util.OptionalInt;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.OptionalInt;
 
 /**
  * An unwrapped packet represented by an object with important field data.
@@ -75,7 +74,7 @@ public interface FieldsUnwrappedPacket extends UnwrappedPacket {
         Component headText = headText();
 
         if (headText != null)
-            out.child(Components.label(headText));
+            out.child(UIComponents.label(headText));
 
         Object rawFields = rawFieldsObject();
 

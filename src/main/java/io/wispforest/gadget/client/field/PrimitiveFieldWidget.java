@@ -5,9 +5,9 @@ import io.wispforest.gadget.client.gui.TabTextBoxComponent;
 import io.wispforest.gadget.desc.PrimitiveFieldObject;
 import io.wispforest.gadget.desc.edit.PrimitiveEditData;
 import io.wispforest.gadget.path.ObjectPath;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.TextBoxComponent;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
@@ -30,11 +30,11 @@ public class PrimitiveFieldWidget extends FlowLayout {
         this.island = island;
         this.fieldPath = fieldPath;
 
-        this.contentsLabel = Components.label(
+        this.contentsLabel = UIComponents.label(
             Component.literal(pfo.contents())
                 .withStyle(ChatFormatting.GRAY)
         );
-        this.editLabel = Components.label(Component.literal(" ✎ "));
+        this.editLabel = UIComponents.label(Component.literal(" ✎ "));
         this.editField = new TabTextBoxComponent(Sizing.fixed(100));
         this.editData = pfo.editData().orElseThrow();
 

@@ -23,12 +23,14 @@ import io.wispforest.gadget.network.packet.c2s.OpenFieldDataScreenC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.RequestResourceC2SPacket;
 import io.wispforest.gadget.network.packet.s2c.*;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.layers.Layer;
 import io.wispforest.owo.ui.layers.Layers;
+import java.io.ByteArrayInputStream;
+import java.util.List;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -53,9 +55,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
-
-import java.io.ByteArrayInputStream;
-import java.util.List;
 
 public class GadgetClient implements ClientModInitializer {
     public static final KeyMapping INSPECT_KEY = new KeyMapping("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyMapping.Category.MISC);
@@ -181,11 +180,11 @@ public class GadgetClient implements ClientModInitializer {
             "menu.playerReporting"
         );
 
-        Layers.add(Containers::verticalFlow, instance -> {
+        Layers.add(UIContainers::verticalFlow, instance -> {
             if (!Gadget.CONFIG.menuButtonEnabled()) return;
 
             instance.adapter.rootComponent.child(
-                Components.button(
+                    UIComponents.button(
                     Component.translatable("text.gadget.menu_button"),
                     button -> Minecraft.getInstance().setScreen(new GadgetScreen(instance.screen))
                 ).<Button>configure(button -> {
