@@ -6,47 +6,42 @@ import io.wispforest.gadget.client.gui.SidebarBuilder;
 import io.wispforest.gadget.network.GadgetNetworking;
 import io.wispforest.gadget.network.packet.c2s.ReplaceStackC2SPacket;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.MergedComponentMap;
-import net.minecraft.nbt.NbtCompound;
+import java.util.function.Consumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import org.apache.commons.lang3.mutable.MutableInt;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
 public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
     private final NbtDataIsland island;
-    private final HandledScreen<?> parent;
+    private final AbstractContainerScreen<?> parent;
     private final Observable<@Nullable String> currentEncodingError = Observable.of(null);
 
-    public StackComponentDataScreen(HandledScreen<?> parent, Slot slot) {
-        var stack = slot.getStack();
-        Consumer<NbtCompound> reloader = null;
+    public StackComponentDataScreen(AbstractContainerScreen<?> parent, Slot slot) {
+        var stack = slot.getItem();
+        Consumer<CompoundTag> reloader = null;
 
-        var registries = MinecraftClient.getInstance().world.getRegistryManager();
+        var registries = Minecraft.getInstance().level.registryAccess();
 
         if (ServerData.canReplaceStacks()) {
             reloader = newNbt -> {
-                DataResult<ComponentChanges> result = ComponentChanges.CODEC.parse(
-                    registries.getOps(NbtOps.INSTANCE),
+                DataResult<DataComponentPatch> result = DataComponentPatch.CODEC.parse(
+                    registries.createSerializationContext(NbtOps.INSTANCE),
                     newNbt
                 );
 
@@ -57,26 +52,26 @@ public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
                     .ifSuccess(newChanges -> {
                         currentEncodingError.set(null);
 
-                        ((MergedComponentMap) stack.getComponents()).setChanges(newChanges);
+                        ((PatchedDataComponentMap) stack.getComponents()).restorePatch(newChanges);
 //                        stack.getItem().postProcessComponents(stack);
 
-                        if (parent instanceof CreativeInventoryScreen) {
+                        if (parent instanceof CreativeModeInventoryScreen) {
                             // Let it handle it.
                             return;
                         }
 
-                        GadgetNetworking.CHANNEL.clientHandle().send(new ReplaceStackC2SPacket(slot.id, stack));
+                        GadgetNetworking.CHANNEL.clientHandle().send(new ReplaceStackC2SPacket(slot.index, stack));
                     });
             };
         }
 
-        NbtCompound tag = (NbtCompound) ComponentChanges.CODEC.encodeStart(
-            registries.getOps(NbtOps.INSTANCE),
-            stack.getComponentChanges()
+        CompoundTag tag = (CompoundTag) DataComponentPatch.CODEC.encodeStart(
+            registries.createSerializationContext(NbtOps.INSTANCE),
+            stack.getComponentsPatch()
         )
             .getOrThrow();
 
-        if (tag == null) tag = new NbtCompound();
+        if (tag == null) tag = new CompoundTag();
 
         this.parent = parent;
         this.island = new NbtDataIsland(tag, reloader);
@@ -84,7 +79,7 @@ public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
 
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::verticalFlow);
+        return OwoUIAdapter.create(this, UIContainers::verticalFlow);
     }
 
     @Override
@@ -95,9 +90,9 @@ public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT);
 
 
-        FlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
+        FlowLayout main = UIContainers.verticalFlow(Sizing.fill(100), Sizing.content());
 
-        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
+        ScrollContainer<FlowLayout> scroll = UIContainers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         rootComponent.child(scroll.child(main));
@@ -107,11 +102,11 @@ public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
 
         main.child(island);
 
-        FlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        FlowLayout sidebar = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
 
         if (island.reloader != null) {
-            var addButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16))
-                .child(Components.label(Text.literal("+"))
+            var addButton = UIContainers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16))
+                .child(UIComponents.label(Component.literal("+"))
                     .verticalTextAlignment(VerticalAlignment.CENTER)
                     .horizontalTextAlignment(HorizontalAlignment.CENTER)
                     .positioning(Positioning.absolute(5, 4))
@@ -143,15 +138,15 @@ public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
             sidebar.child(addButton);
         }
 
-        var infoButton = new SidebarBuilder.Button(Text.translatable("text.gadget.encode_status.success"), Text.translatable("text.gadget.encode_status.success.tooltip"));
+        var infoButton = new SidebarBuilder.Button(Component.translatable("text.gadget.encode_status.success"), Component.translatable("text.gadget.encode_status.success.tooltip"));
 
         currentEncodingError.observe(error -> {
             if (error == null) {
-                infoButton.icon(Text.translatable("text.gadget.encode_status.success"));
-                infoButton.tooltip(Text.translatable("text.gadget.encode_status.success.tooltip"));
+                infoButton.icon(Component.translatable("text.gadget.encode_status.success"));
+                infoButton.tooltip(Component.translatable("text.gadget.encode_status.success.tooltip"));
             } else {
-                infoButton.icon(Text.translatable("text.gadget.encode_status.failure"));
-                infoButton.tooltip(Text.translatable("text.gadget.encode_status.failure.tooltip", error));
+                infoButton.icon(Component.translatable("text.gadget.encode_status.failure"));
+                infoButton.tooltip(Component.translatable("text.gadget.encode_status.failure.tooltip", error));
             }
         });
 
@@ -165,7 +160,7 @@ public class StackComponentDataScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     @Override
-    public void close() {
-        client.setScreen(parent);
+    public void onClose() {
+        minecraft.setScreen(parent);
     }
 }

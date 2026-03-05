@@ -9,39 +9,37 @@ import io.wispforest.owo.config.ui.component.OptionValueProvider;
 import io.wispforest.owo.config.ui.component.SearchAnchorComponent;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.CollapsibleContainer;
-import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.resources.language.I18n;
 
 @SuppressWarnings("UnstableApiUsage")
-public class RemappingListOptionContainer extends CollapsibleContainer implements Component, OptionValueProvider {
+public class RemappingListOptionContainer extends CollapsibleContainer implements UIComponent, OptionValueProvider {
 
     protected final Option<List<String>> backingOption;
     protected final List<String> backingList;
     private final Function<String, String> remapper;
     private final Function<String, String> unmapper;
 
-    protected final ButtonWidget resetButton;
+    protected final Button resetButton;
 
     public RemappingListOptionContainer(Option<List<String>> option, Function<String, String> remapper, Function<String, String> unmapper) {
         super(
             Sizing.fill(100), Sizing.content(),
-            Text.translatable("text.config." + option.configName() + ".option." + option.key().asString()),
+            net.minecraft.network.chat.Component.translatable("text.config." + option.configName() + ".option." + option.key().asString()),
             option.backingField().field().isAnnotationPresent(Expanded.class)
         );
 
@@ -57,11 +55,11 @@ public class RemappingListOptionContainer extends CollapsibleContainer implement
         this.titleLayout.verticalAlignment(VerticalAlignment.CENTER);
 
         if (!option.detached()) {
-            this.titleLayout.child(Components.label(Text.translatable("text.owo.config.list.add_entry").formatted(Formatting.GRAY)).<LabelComponent>configure(label -> {
+            this.titleLayout.child(UIComponents.label(net.minecraft.network.chat.Component.translatable("text.owo.config.list.add_entry").withStyle(ChatFormatting.GRAY)).<LabelComponent>configure(label -> {
                 label.cursorStyle(CursorStyle.HAND);
 
-                label.mouseEnter().subscribe(() -> label.text(label.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
-                label.mouseLeave().subscribe(() -> label.text(label.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
+                label.mouseEnter().subscribe(() -> label.text(label.text().copy().withStyle(style -> style.withColor(ChatFormatting.YELLOW))));
+                label.mouseLeave().subscribe(() -> label.text(label.text().copy().withStyle(style -> style.withColor(ChatFormatting.GRAY))));
                 label.mouseDown().subscribe((click, doubled) -> {
                     UISounds.playInteractionSound();
                     this.backingList.add("");
@@ -69,7 +67,7 @@ public class RemappingListOptionContainer extends CollapsibleContainer implement
                     if (!this.expanded) this.toggleExpansion();
                     this.refreshOptions();
 
-                    var lastEntry = (ParentComponent) this.collapsibleChildren.get(this.collapsibleChildren.size() - 1);
+                    var lastEntry = (ParentUIComponent) this.collapsibleChildren.get(this.collapsibleChildren.size() - 1);
                     this.focusHandler().focus(
                         lastEntry.children().get(lastEntry.children().size() - 1),
                         FocusSource.MOUSE_CLICK
@@ -80,7 +78,7 @@ public class RemappingListOptionContainer extends CollapsibleContainer implement
             }));
         }
 
-        this.resetButton = Components.button(Text.literal("⇄"), (ButtonComponent button) -> {
+        this.resetButton = UIComponents.button(net.minecraft.network.chat.Component.literal("⇄"), (ButtonComponent button) -> {
             this.backingList.clear();
             this.backingList.addAll(option.defaultValue());
 
@@ -97,7 +95,7 @@ public class RemappingListOptionContainer extends CollapsibleContainer implement
         this.titleLayout.child(new SearchAnchorComponent(
             this.titleLayout,
             option.key(),
-            () -> I18n.translate("text.config." + option.configName() + ".option." + option.key().asString()),
+            () -> I18n.get("text.config." + option.configName() + ".option." + option.key().asString()),
             () -> this.backingList.stream().map(remapper).collect(Collectors.joining())
         ));
     }
@@ -111,16 +109,16 @@ public class RemappingListOptionContainer extends CollapsibleContainer implement
         if (listType == null) throw new IllegalStateException();
 
         for (int i = 0; i < this.backingList.size(); i++) {
-            var container = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
+            var container = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content());
             container.verticalAlignment(VerticalAlignment.CENTER);
 
             int optionIndex = i;
-            final var label = Components.label(TextOps.withFormatting("- ", Formatting.GRAY));
+            final var label = UIComponents.label(TextOps.withFormatting("- ", ChatFormatting.GRAY));
             label.margins(Insets.left(10));
             if (!this.backingOption.detached()) {
                 label.cursorStyle(CursorStyle.HAND);
-                label.mouseEnter().subscribe(() -> label.text(TextOps.withFormatting("x ", Formatting.GRAY)));
-                label.mouseLeave().subscribe(() -> label.text(TextOps.withFormatting("- ", Formatting.GRAY)));
+                label.mouseEnter().subscribe(() -> label.text(TextOps.withFormatting("x ", ChatFormatting.GRAY)));
+                label.mouseLeave().subscribe(() -> label.text(TextOps.withFormatting("- ", ChatFormatting.GRAY)));
                 label.mouseDown().subscribe((click, doubled) -> {
                     this.backingList.remove(optionIndex);
                     this.refreshResetButton();
@@ -133,9 +131,9 @@ public class RemappingListOptionContainer extends CollapsibleContainer implement
             container.child(label);
 
             final var box = new ConfigTextBox();
-            box.setText(remapper.apply(this.backingList.get(i)));
-            box.setCursorToStart(false);
-            box.setDrawsBackground(false);
+            box.setValue(remapper.apply(this.backingList.get(i)));
+            box.moveCursorToStart(false);
+            box.setBordered(false);
             box.margins(Insets.vertical(2));
             box.horizontalSizing(Sizing.fill(95));
             box.verticalSizing(Sizing.fixed(8));

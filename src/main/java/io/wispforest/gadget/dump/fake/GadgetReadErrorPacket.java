@@ -3,13 +3,13 @@ package io.wispforest.gadget.dump.fake;
 import io.netty.buffer.ByteBuf;
 import io.wispforest.gadget.dump.read.unwrapped.UnprocessedUnwrappedPacket;
 import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 public record GadgetReadErrorPacket(byte[] data, int packetId, Exception exception) implements FakeGadgetPacket {
     public static final int ID = -2;
 
-    public static GadgetReadErrorPacket from(PacketByteBuf buf, int packetId, Exception exception) {
+    public static GadgetReadErrorPacket from(FriendlyByteBuf buf, int packetId, Exception exception) {
         byte[] data = new byte[buf.readableBytes()];
         buf.readBytes(data);
 
@@ -22,7 +22,7 @@ public record GadgetReadErrorPacket(byte[] data, int packetId, Exception excepti
     }
 
     @Override
-    public PacketCodec<ByteBuf, GadgetReadErrorPacket> codec() {
+    public StreamCodec<ByteBuf, GadgetReadErrorPacket> codec() {
         throw new UnsupportedOperationException();
     }
 

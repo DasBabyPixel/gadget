@@ -14,13 +14,12 @@ import io.wispforest.gadget.network.packet.s2c.FieldDataResponseS2CPacket;
 import io.wispforest.gadget.path.ObjectPath;
 import io.wispforest.gadget.path.PathStep;
 import io.wispforest.gadget.util.CancellationTokenSource;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 
 public class RemoteFieldDataSource implements FieldDataSource, AutoCloseable {
     private final InspectionTarget target;
@@ -79,7 +78,7 @@ public class RemoteFieldDataSource implements FieldDataSource, AutoCloseable {
     }
 
     @Override
-    public CompletableFuture<Void> setNbtCompoundAt(ObjectPath path, NbtCompound tag) {
+    public CompletableFuture<Void> setNbtCompoundAt(ObjectPath path, CompoundTag tag) {
         cancelSource.token().throwIfCancelled();
 
         GadgetNetworking.CHANNEL.clientHandle().send(new FieldDataSetNbtCompoundC2SPacket(this.target, path, tag));
@@ -121,14 +120,14 @@ public class RemoteFieldDataSource implements FieldDataSource, AutoCloseable {
     }
 
     public static class RemoteErrorException extends RuntimeException {
-        private final Text message;
+        private final Component message;
 
-        public RemoteErrorException(Text message) {
+        public RemoteErrorException(Component message) {
             super(message.getString());
             this.message = message;
         }
 
-        public Text message() {
+        public Component message() {
             return message;
         }
     }

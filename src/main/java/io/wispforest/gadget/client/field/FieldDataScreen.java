@@ -15,21 +15,12 @@ import io.wispforest.gadget.path.PathStep;
 import io.wispforest.gadget.util.FormattedDumper;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.OverlayContainer;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.Text;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -39,6 +30,14 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
     private final InspectionTarget target;
@@ -53,7 +52,7 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
         if (!isClient)
             dataSource = new RemoteFieldDataSource(target, rootData, initialFields);
         else
-            dataSource = new LocalFieldDataSource(target.resolve(MinecraftClient.getInstance().world), isMutable);
+            dataSource = new LocalFieldDataSource(target.resolve(Minecraft.getInstance().level), isMutable);
 
         this.island = new FieldDataIsland(
             dataSource,
@@ -72,7 +71,7 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
 
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::verticalFlow);
+        return OwoUIAdapter.create(this, UIContainers::verticalFlow);
     }
 
     @Override
@@ -83,9 +82,9 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT);
 
 
-        FlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
+        FlowLayout main = UIContainers.verticalFlow(Sizing.fill(100), Sizing.content());
 
-        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
+        ScrollContainer<FlowLayout> scroll = UIContainers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         verticalFlowLayout.child(scroll.child(main));
@@ -98,15 +97,15 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
         SidebarBuilder sidebar = new SidebarBuilder();
 
         sidebar.button(
-            Text.translatable("text.gadget." + (isClient() ? "client" : "server") + "_view.icon"),
-            Text.translatable("text.gadget." + (isClient() ? "client" : "server") + "_view" + (GadgetNetworking.CHANNEL.canSendToServer() ? "" : ".no_switch") + ".tooltip"),
+            Component.translatable("text.gadget." + (isClient() ? "client" : "server") + "_view.icon"),
+            Component.translatable("text.gadget." + (isClient() ? "client" : "server") + "_view" + (GadgetNetworking.CHANNEL.canSendToServer() ? "" : ".no_switch") + ".tooltip"),
             (mouseX, mouseY) -> {
                 if (!GadgetNetworking.CHANNEL.canSendToServer()) return;
 
                 if (isClient())
                     GadgetNetworking.CHANNEL.clientHandle().send(new OpenFieldDataScreenC2SPacket(target));
                 else
-                    client.setScreen(new FieldDataScreen(
+                    minecraft.setScreen(new FieldDataScreen(
                         target,
                         true,
                         true, null,
@@ -121,12 +120,12 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
             .child(search
                 .positioning(Positioning.relative(0, 100)));
         verticalFlowLayout.keyPress().subscribe((input) -> {
-            if (input.key() != GLFW.GLFW_KEY_F || !input.hasCtrl())
+            if (input.key() != GLFW.GLFW_KEY_F || !input.hasControlDown())
                 return false;
 
             uiAdapter.rootComponent.focusHandler().focus(
                 search.searchBox(),
-                Component.FocusSource.MOUSE_CLICK
+                io.wispforest.owo.ui.core.UIComponent.FocusSource.MOUSE_CLICK
             );
 
             return true;
@@ -136,31 +135,31 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     public void openExportModal() {
-        FlowLayout exportModal = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        OverlayContainer<EventEaterWrapper<FlowLayout>> exportOverlay = Containers.overlay(new EventEaterWrapper<>(exportModal));
+        FlowLayout exportModal = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
+        OverlayContainer<EventEaterWrapper<FlowLayout>> exportOverlay = UIContainers.overlay(new EventEaterWrapper<>(exportModal));
 
         exportModal
             .surface(Surface.DARK_PANEL)
             .padding(Insets.of(8));
 
-        exportModal.child(Components.label(Text.translatable("text.gadget.export.packet_dump"))
+        exportModal.child(UIComponents.label(Component.translatable("text.gadget.export.packet_dump"))
             .margins(Insets.bottom(4)));
 
         SaveFilePathComponent savePath =
             new SaveFilePathComponent(
-                I18n.translate("text.gadget.export.packet_dump"),
+                I18n.get("text.gadget.export.packet_dump"),
                 FabricLoader.getInstance().getGameDir().toString() + "/"
             )
             .patterns(List.of("*.txt", "*.json"))
             .filterDescription("Plain text/JSON file");
 
-        exportModal.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
-            .child(Components.label(Text.translatable("text.gadget.export.output_path")))
+        exportModal.child(UIContainers.horizontalFlow(Sizing.content(), Sizing.content())
+            .child(UIComponents.label(Component.translatable("text.gadget.export.output_path")))
             .child(savePath)
             .verticalAlignment(VerticalAlignment.CENTER)
         );
 
-        var button = Components.button(Text.translatable("text.gadget.export.export_button"), b -> {
+        var button = UIComponents.button(Component.translatable("text.gadget.export.export_button"), b -> {
             var path = Path.of(savePath.path().get());
 
             exportOverlay.remove();
@@ -192,14 +191,14 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
         BufferedWriter bw = Files.newBufferedWriter(path);
         JsonWriter writer = new JsonWriter(bw);
 
-        var toast = ProgressToast.create(Text.translatable("text.gadget.exporting_field_dump"));
+        var toast = ProgressToast.create(Component.translatable("text.gadget.exporting_field_dump"));
 
         CompletableFuture<Void> future =
             island.dumpToJson(
                     writer,
                     island.root(),
                     5,
-                    f -> toast.step(Text.translatable("text.gadget.exporting.dumping_path", f.toString()))
+                    f -> toast.step(Component.translatable("text.gadget.exporting.dumping_path", f.toString()))
                 )
                 .whenComplete((ignored1, ignored2) -> {
                     try {
@@ -229,8 +228,8 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (input.key() == GLFW.GLFW_KEY_E && input.hasCtrl()) {
+    public boolean keyPressed(KeyEvent input) {
+        if (input.key() == GLFW.GLFW_KEY_E && input.hasControlDown()) {
             openExportModal();
 
             return true;

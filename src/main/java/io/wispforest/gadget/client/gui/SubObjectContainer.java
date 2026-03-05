@@ -4,28 +4,25 @@ import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.RotationAxis;
-import org.lwjgl.glfw.GLFW;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.client.input.KeyEvent;
+import org.lwjgl.glfw.GLFW;
 
 // Copied from owo-ui's CollapsibleContainer
 public class SubObjectContainer extends FlowLayout {
-    public static final Surface SURFACE = (ctx, component) -> ctx.fill(
-        component.x() + 5,
-        component.y(),
-        component.x() + 6,
-        component.y() + component.height(),
+    public static final Surface SURFACE = (ctx, UIcomponent) -> ctx.fill(
+        UIcomponent.x() + 5,
+        UIcomponent.y(),
+        UIcomponent.x() + 6,
+        UIcomponent.y() + UIcomponent.height(),
         0x77FFFFFF
     );
     private final Consumer<SubObjectContainer> loader;
     private final Consumer<SubObjectContainer> unloader;
 
-    protected final List<Component> collapsibleChildren = new ArrayList<>();
+    protected final List<UIComponent> collapsibleChildren = new ArrayList<>();
     protected boolean expanded;
 
     protected final SpinnyBoiComponent spinnyBoi;
@@ -57,7 +54,7 @@ public class SubObjectContainer extends FlowLayout {
         });
     }
 
-    public Component getSpinnyBoi() {
+    public UIComponent getSpinnyBoi() {
         return spinnyBoi;
     }
 
@@ -86,7 +83,7 @@ public class SubObjectContainer extends FlowLayout {
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
+    public boolean onKeyPress(KeyEvent input) {
         if (input.key() == GLFW.GLFW_KEY_SPACE || input.key() == GLFW.GLFW_KEY_ENTER || input.key() == GLFW.GLFW_KEY_KP_ENTER) {
             this.toggleExpansion();
 
@@ -98,7 +95,7 @@ public class SubObjectContainer extends FlowLayout {
     }
 
     @Override
-    public FlowLayout child(Component child) {
+    public FlowLayout child(UIComponent child) {
         this.collapsibleChildren.add(child);
 
         if (this.expanded) {
@@ -108,7 +105,7 @@ public class SubObjectContainer extends FlowLayout {
     }
 
     @Override
-    public FlowLayout child(int index, Component child) {
+    public FlowLayout child(int index, UIComponent child) {
         this.collapsibleChildren.add(index, child);
 
         if (this.expanded) {
@@ -118,7 +115,7 @@ public class SubObjectContainer extends FlowLayout {
     }
 
     @Override
-    public FlowLayout removeChild(Component child) {
+    public FlowLayout removeChild(UIComponent child) {
         this.collapsibleChildren.remove(child);
         return super.removeChild(child);
     }
@@ -129,7 +126,7 @@ public class SubObjectContainer extends FlowLayout {
         return super.clearChildren();
     }
 
-    public List<Component> collapsibleChildren() {
+    public List<UIComponent> collapsibleChildren() {
         return collapsibleChildren;
     }
 
@@ -139,7 +136,7 @@ public class SubObjectContainer extends FlowLayout {
         protected float targetRotation = 90;
 
         public SpinnyBoiComponent() {
-            super(Text.literal(">"));
+            super(net.minecraft.network.chat.Component.literal(">"));
             this.margins(Insets.horizontal(4));
         }
 
@@ -150,8 +147,8 @@ public class SubObjectContainer extends FlowLayout {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
-            var matrices = ctx.getMatrices();
+        public void draw(OwoUIGraphics ctx, int mouseX, int mouseY, float partialTicks, float delta) {
+            var matrices = ctx.pose();
 
             matrices.pushMatrix();
             matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1);

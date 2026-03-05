@@ -1,10 +1,9 @@
 package io.wispforest.gadget.mixin.owo;
 
-import net.minecraft.util.Identifier;
+import java.util.Map;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-
-import java.util.Map;
 
 @Mixin(targets = "io.wispforest.owo.network.OwoHandshake$HandshakeResponse")
 public interface HandshakeResponseAccessor {

@@ -2,23 +2,22 @@ package io.wispforest.gadget.client.gui;
 
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.component.BoxComponent;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.text.Text;
-
 import java.util.function.LongSupplier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastManager;
+import net.minecraft.network.chat.Component;
 
 public class ProgressToastImpl implements Toast, ProgressToast {
     private OwoUIAdapter<FlowLayout> adapter;
-    private final MinecraftClient client = MinecraftClient.getInstance();
+    private final Minecraft client = Minecraft.getInstance();
     private boolean attached = false;
 
     private LabelComponent stepLabel;
@@ -28,20 +27,20 @@ public class ProgressToastImpl implements Toast, ProgressToast {
     private long followingTotal = 0;
     private Visibility visibility = Visibility.SHOW;
 
-    public ProgressToastImpl(Text headText) {
-        this.adapter = OwoUIAdapter.createWithoutScreen(0, 0, 160, 32, Containers::verticalFlow);
+    public ProgressToastImpl(Component headText) {
+        this.adapter = OwoUIAdapter.createWithoutScreen(0, 0, 160, 32, UIContainers::verticalFlow);
 
         var root = this.adapter.rootComponent;
 
         root
-            .child(Components.label(headText)
+            .child(UIComponents.label(headText)
                 .maxWidth(160)
                 .horizontalTextAlignment(HorizontalAlignment.CENTER)
                 .margins(Insets.bottom(0)))
-            .child(stepLabel = Components.label(Text.empty())
+            .child(stepLabel = UIComponents.label(Component.empty())
                 .maxWidth(160)
                 .horizontalTextAlignment(HorizontalAlignment.CENTER))
-            .child((progressBox = Components.box(Sizing.fixed(0), Sizing.fixed(3)))
+            .child((progressBox = UIComponents.box(Sizing.fixed(0), Sizing.fixed(3)))
                 .color(Color.WHITE)
                 .fill(true)
                 .positioning(Positioning.absolute(0, 15)))
@@ -57,7 +56,7 @@ public class ProgressToastImpl implements Toast, ProgressToast {
     }
 
     @Override
-    public void draw(DrawContext ctx, TextRenderer textRenderer, long startTime) {
+    public void render(GuiGraphics ctx, Font textRenderer, long startTime) {
         long value = following == null ? -1 : following.getAsLong();
 
         if (value < 0) {
@@ -67,7 +66,7 @@ public class ProgressToastImpl implements Toast, ProgressToast {
             progressBox.horizontalSizing(Sizing.fixed((int) (value * 140 / followingTotal)));
         }
 
-        this.adapter.render(ctx, 0, 0, client.getRenderTickCounter().getTickProgress(false));
+        this.adapter.render(ctx, 0, 0, client.getDeltaTracker().getGameTimeDeltaPartialTick(false));
     }
 
     @Override
@@ -87,15 +86,15 @@ public class ProgressToastImpl implements Toast, ProgressToast {
     }
 
     @Override
-    public Visibility getVisibility() {
+    public Visibility getWantedVisibility() {
         return visibility;
     }
 
     @Override
-    public void step(Text text) {
-        MinecraftClient.getInstance().execute(() -> {
+    public void step(Component text) {
+        Minecraft.getInstance().execute(() -> {
             if (!attached) {
-                MinecraftClient.getInstance().getToastManager().add(this);
+                Minecraft.getInstance().getToastManager().addToast(this);
                 attached = true;
             }
 
@@ -107,7 +106,7 @@ public class ProgressToastImpl implements Toast, ProgressToast {
 
     @Override
     public void followProgress(LongSupplier following, long total) {
-        MinecraftClient.getInstance().execute(() -> {
+        Minecraft.getInstance().execute(() -> {
             this.following = following;
             this.followingTotal = total;
         });
@@ -115,17 +114,17 @@ public class ProgressToastImpl implements Toast, ProgressToast {
 
     @Override
     public void force() {
-        MinecraftClient.getInstance().execute(() -> {
+        Minecraft.getInstance().execute(() -> {
             if (!attached) {
-                MinecraftClient.getInstance().getToastManager().add(this);
+                Minecraft.getInstance().getToastManager().addToast(this);
                 attached = true;
             }
         });
     }
 
     @Override
-    public void finish(Text text, boolean hideImmediately) {
-        MinecraftClient.getInstance().execute(() -> {
+    public void finish(Component text, boolean hideImmediately) {
+        Minecraft.getInstance().execute(() -> {
             this.stepLabel.text(text);
             this.following = null;
             stopTime = hideImmediately ? -2 : -1;
@@ -134,8 +133,8 @@ public class ProgressToastImpl implements Toast, ProgressToast {
 
     public void oom(OutOfMemoryError oom) {
         adapter.rootComponent.clearChildren();
-        client.currentScreen.removed();
-        client.currentScreen = null;
+        client.screen.removed();
+        client.screen = null;
 
         following = null;
         adapter = null;

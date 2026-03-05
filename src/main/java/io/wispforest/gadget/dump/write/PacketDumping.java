@@ -9,13 +9,13 @@ import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
 import io.wispforest.gadget.util.SlicingPacketByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.network.state.NetworkState;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.Packet;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.ProtocolInfo;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.Packet;
 
 public final class PacketDumping {
-    private static final Int2ObjectMap<PacketCodec<? super PacketByteBuf, ? extends FakeGadgetPacket>> PACKETS = new Int2ObjectOpenHashMap<>();
+    private static final Int2ObjectMap<StreamCodec<? super FriendlyByteBuf, ? extends FakeGadgetPacket>> PACKETS = new Int2ObjectOpenHashMap<>();
 
     private PacketDumping() {
 
@@ -28,14 +28,14 @@ public final class PacketDumping {
 
     }
 
-    public static void register(int id, PacketCodec<? super PacketByteBuf, ? extends FakeGadgetPacket> codec) {
+    public static void register(int id, StreamCodec<? super FriendlyByteBuf, ? extends FakeGadgetPacket> codec) {
         if (PACKETS.put(id, codec) != null) {
             throw new IllegalStateException("Codec on " + id + " collides with another codec");
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static void writePacket(PacketByteBuf buf, Packet<?> packet, NetworkState<?> state) {
+    public static void writePacket(FriendlyByteBuf buf, Packet<?> packet, ProtocolInfo<?> state) {
         int startWriteIdx = buf.writerIndex();
         int packetId = 0;
 
@@ -43,11 +43,11 @@ public final class PacketDumping {
             if (packet instanceof FakeGadgetPacket fakePacket) {
                 packetId = fakePacket.id();
                 buf.writeVarInt(packetId);
-                ((PacketCodec<ByteBuf, FakeGadgetPacket>) fakePacket.codec()).encode(buf, fakePacket);
+                ((StreamCodec<ByteBuf, FakeGadgetPacket>) fakePacket.codec()).encode(buf, fakePacket);
                 return;
             }
 
-            ((PacketCodec<ByteBuf, Object>)(Object) state.codec()).encode(new SlicingPacketByteBuf(buf), packet);
+            ((StreamCodec<ByteBuf, Object>)(Object) state.codec()).encode(new SlicingPacketByteBuf(buf), packet);
         } catch (Exception e) {
             buf.writerIndex(startWriteIdx);
 
@@ -59,12 +59,12 @@ public final class PacketDumping {
         }
     }
 
-    public static Packet<?> readPacket(PacketByteBuf buf, NetworkState<?> state) {
+    public static Packet<?> readPacket(FriendlyByteBuf buf, ProtocolInfo<?> state) {
         int startOfData = buf.readerIndex();
         int packetId = buf.readVarInt();
 
         try {
-            PacketCodec<? super PacketByteBuf, ? extends FakeGadgetPacket> fakeCodec = PACKETS.get(packetId);
+            StreamCodec<? super FriendlyByteBuf, ? extends FakeGadgetPacket> fakeCodec = PACKETS.get(packetId);
             if (fakeCodec != null) {
                 return fakeCodec.decode(buf).unwrapVanilla();
             }

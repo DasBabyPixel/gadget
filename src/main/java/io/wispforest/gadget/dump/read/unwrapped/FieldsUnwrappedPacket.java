@@ -6,16 +6,15 @@ import io.wispforest.gadget.field.LocalFieldDataSource;
 import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.FormattedDumper;
 import io.wispforest.gadget.util.ReflectionUtil;
-import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import java.util.OptionalInt;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.OptionalInt;
 
 /**
  * An unwrapped packet represented by an object with important field data.
@@ -30,12 +29,12 @@ public interface FieldsUnwrappedPacket extends UnwrappedPacket {
         return OptionalInt.empty();
     }
 
-    default @Nullable Text headText() {
-        MutableText headText = Text.literal(ReflectionUtil.nameWithoutPackage(rawFieldsObject().getClass()));
+    default @Nullable Component headText() {
+        MutableComponent headText = Component.literal(ReflectionUtil.nameWithoutPackage(rawFieldsObject().getClass()));
 
         if (packetId().isPresent()) {
-            headText.append(Text.literal(" #" + packetId().getAsInt())
-                .formatted(Formatting.GRAY));
+            headText.append(Component.literal(" #" + packetId().getAsInt())
+                .withStyle(ChatFormatting.GRAY));
         }
 
         return headText;
@@ -43,7 +42,7 @@ public interface FieldsUnwrappedPacket extends UnwrappedPacket {
 
     @Override
     default void gatherSearchText(StringBuilder out, ErrorSink errSink) {
-        Text headText = headText();
+        Component headText = headText();
 
         if (headText != null)
             out.append(" ").append(headText.getString());
@@ -51,7 +50,7 @@ public interface FieldsUnwrappedPacket extends UnwrappedPacket {
 
     @Override
     default void dumpAsPlainText(FormattedDumper out, int indent, ErrorSink errSink) {
-        Text headText = headText();
+        Component headText = headText();
 
         if (headText != null)
             out.write(indent, headText.getString());
@@ -72,10 +71,10 @@ public interface FieldsUnwrappedPacket extends UnwrappedPacket {
     @Environment(EnvType.CLIENT)
     @Override
     default void render(FlowLayout out, ErrorSink errSink) {
-        Text headText = headText();
+        Component headText = headText();
 
         if (headText != null)
-            out.child(Components.label(headText));
+            out.child(UIComponents.label(headText));
 
         Object rawFields = rawFieldsObject();
 

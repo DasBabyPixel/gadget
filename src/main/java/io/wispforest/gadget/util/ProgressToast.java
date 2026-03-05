@@ -5,8 +5,7 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.ProgressToastImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.text.Text;
-
+import net.minecraft.network.chat.Component;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.LongSupplier;
 
 public interface ProgressToast {
-    static ProgressToast create(Text headText) {
+    static ProgressToast create(Component headText) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             return new ProgressToastImpl(headText);
         } else {
@@ -31,7 +30,7 @@ public interface ProgressToast {
         return new Dummy();
     }
 
-    void step(Text text);
+    void step(Component text);
 
     void followProgress(LongSupplier stream, long total);
 
@@ -64,7 +63,7 @@ public interface ProgressToast {
 
     void force();
 
-    void finish(Text text, boolean hideImmediately);
+    void finish(Component text, boolean hideImmediately);
 
     void oom(OutOfMemoryError oom);
 
@@ -77,22 +76,22 @@ public interface ProgressToast {
                     oom(oom);
                     return;
                 } else if (e instanceof CancellationException || e.getCause() instanceof CancellationException) {
-                    finish(Text.translatable("message.gadget.progress.cancelled"), true);
+                    finish(Component.translatable("message.gadget.progress.cancelled"), true);
                     return;
                 }
 
                 Gadget.LOGGER.error("Loading failed with exception", e);
                 force();
-                finish(Text.translatable("message.gadget.progress.failed"), false);
+                finish(Component.translatable("message.gadget.progress.failed"), false);
             } else {
-                finish(Text.translatable("message.gadget.progress.finished"), closeImmediately);
+                finish(Component.translatable("message.gadget.progress.finished"), closeImmediately);
             }
         });
     }
 
     class Dummy implements ProgressToast {
         @Override
-        public void step(Text text) {
+        public void step(Component text) {
 
         }
 
@@ -107,7 +106,7 @@ public interface ProgressToast {
         }
 
         @Override
-        public void finish(Text text, boolean hideImmediately) {
+        public void finish(Component text, boolean hideImmediately) {
 
         }
 

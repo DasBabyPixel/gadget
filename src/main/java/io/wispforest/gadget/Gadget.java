@@ -8,7 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ public class Gadget implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("gadget");
 
     public static Identifier id(String path) {
-        return Identifier.of(MODID, path);
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 
     @Override

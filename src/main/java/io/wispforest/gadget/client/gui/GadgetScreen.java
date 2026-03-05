@@ -13,25 +13,24 @@ import io.wispforest.gadget.util.FileUtil;
 import io.wispforest.gadget.util.NumberUtil;
 import io.wispforest.gadget.util.ResourceUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
     private final Screen parent;
@@ -43,7 +42,7 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
 
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::verticalFlow);
+        return OwoUIAdapter.create(this, UIContainers::verticalFlow);
     }
 
     @Override
@@ -54,14 +53,14 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT);
 
 
-        FlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
-        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
+        FlowLayout main = UIContainers.verticalFlow(Sizing.fill(100), Sizing.content());
+        ScrollContainer<FlowLayout> scroll = UIContainers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         rootComponent.child(scroll.child(main));
         main.padding(Insets.of(15));
 
-        LabelComponent openOther = Components.label(Text.translatable("text.gadget.open_other_dump"));
+        LabelComponent openOther = UIComponents.label(Component.translatable("text.gadget.open_other_dump"));
 
         openOther.margins(Insets.bottom(4));
         GuiUtil.semiButton(openOther, () -> {
@@ -74,12 +73,12 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
 
         main.child(openOther);
 
-        LabelComponent inspectResources = Components.label(Text.translatable("text.gadget.inspect_resources"));
+        LabelComponent inspectResources = UIComponents.label(Component.translatable("text.gadget.inspect_resources"));
 
         inspectResources.margins(Insets.bottom(4));
         GuiUtil.semiButton(inspectResources,
             () -> {
-                var resources = ResourceUtil.collectAllResources(client.getResourceManager());
+                var resources = ResourceUtil.collectAllResources(minecraft.getResourceManager());
                 var map = new HashMap<Identifier, Integer>();
 
                 for (var entry : resources.entrySet())
@@ -89,15 +88,15 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
 
                 screen.resRequester(
                     (id, idx) -> screen.openFile(
-                        id, client.getResourceManager().getAllResources(id).get(idx)::getInputStream));
+                        id, minecraft.getResourceManager().getResourceStack(id).get(idx)::open));
 
-                client.setScreen(screen);
+                minecraft.setScreen(screen);
             });
 
         main.child(inspectResources);
 
         if (ServerData.canRequestServerData()) {
-            LabelComponent inspectServerData = Components.label(Text.translatable("text.gadget.inspect_server_data"));
+            LabelComponent inspectServerData = UIComponents.label(Component.translatable("text.gadget.inspect_server_data"));
 
             inspectServerData.margins(Insets.bottom(4));
             GuiUtil.semiButton(inspectServerData,
@@ -107,7 +106,7 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
         }
 
         if (Gadget.CONFIG.inspectClasses()) {
-            inspectClasses = Components.label(Text.translatable("text.gadget.inspect_exported_classes"));
+            inspectClasses = UIComponents.label(Component.translatable("text.gadget.inspect_exported_classes"));
 
             inspectClasses.margins(Insets.bottom(4));
             GuiUtil.semiButton(inspectClasses,
@@ -127,19 +126,19 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
                  && !filename.endsWith(".dump"))
                     continue;
 
-                FlowLayout row = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
+                FlowLayout row = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content());
 
-                Text labelText = Text.literal("")
-                    .append(Text.literal("d ")
-                        .formatted(Formatting.DARK_RED))
-                    .append(Text.literal(filename + " "))
-                    .append(Text.literal(NumberUtil.formatFileSize(Files.size(dump)) + " ")
-                        .formatted(Formatting.GRAY));
+                Component labelText = Component.literal("")
+                    .append(Component.literal("d ")
+                        .withStyle(ChatFormatting.DARK_RED))
+                    .append(Component.literal(filename + " "))
+                    .append(Component.literal(NumberUtil.formatFileSize(Files.size(dump)) + " ")
+                        .withStyle(ChatFormatting.GRAY));
 
-                row.child(Components.label(labelText))
+                row.child(UIComponents.label(labelText))
                     .padding(Insets.bottom(2));
 
-                LabelComponent openLabel = Components.label(Text.translatable("text.gadget.open"));
+                LabelComponent openLabel = UIComponents.label(Component.translatable("text.gadget.open"));
 
                 GuiUtil.semiButton(openLabel,
                     () -> OpenDumpScreen.openWithProgress(this, dump));
@@ -153,25 +152,25 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         if (input.key() == GLFW.GLFW_KEY_LEFT_SHIFT || input.key() == GLFW.GLFW_KEY_RIGHT_SHIFT) {
-            inspectClasses.text(Text.translatable("text.gadget.inspect_all_classes"));
+            inspectClasses.text(Component.translatable("text.gadget.inspect_all_classes"));
         }
 
         return super.keyPressed(input);
     }
 
     @Override
-    public boolean keyReleased(KeyInput input) {
+    public boolean keyReleased(KeyEvent input) {
         if (input.key() == GLFW.GLFW_KEY_LEFT_SHIFT || input.key() == GLFW.GLFW_KEY_RIGHT_SHIFT) {
-            inspectClasses.text(Text.translatable("text.gadget.inspect_exported_classes"));
+            inspectClasses.text(Component.translatable("text.gadget.inspect_exported_classes"));
         }
 
         return super.keyReleased(input);
     }
 
     @Override
-    public void close() {
-        client.setScreen(parent);
+    public void onClose() {
+        minecraft.setScreen(parent);
     }
 }

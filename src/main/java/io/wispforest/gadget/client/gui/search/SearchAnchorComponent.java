@@ -3,23 +3,22 @@
 
 package io.wispforest.gadget.client.gui.search;
 
-import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.base.BaseUIComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Positioning;
 import io.wispforest.owo.ui.core.Sizing;
-
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
-public class SearchAnchorComponent extends BaseComponent {
+public class SearchAnchorComponent extends BaseUIComponent {
 
-    protected final ParentComponent anchorFrame;
+    protected final ParentUIComponent anchorFrame;
     protected final Supplier<String>[] searchTextSources;
 
 
     @SafeVarargs
-    public SearchAnchorComponent(ParentComponent anchorFrame, Supplier<String>... searchTextSources) {
+    public SearchAnchorComponent(ParentUIComponent anchorFrame, Supplier<String>... searchTextSources) {
         this.anchorFrame = anchorFrame;
         this.searchTextSources = searchTextSources;
 
@@ -28,9 +27,9 @@ public class SearchAnchorComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {}
+    public void draw(OwoUIGraphics ctx, int mouseX, int mouseY, float partialTicks, float delta) {}
 
-    public ParentComponent anchorFrame() {
+    public ParentUIComponent anchorFrame() {
         return this.anchorFrame;
     }
 

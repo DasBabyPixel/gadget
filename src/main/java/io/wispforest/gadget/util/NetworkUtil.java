@@ -1,16 +1,13 @@
 package io.wispforest.gadget.util;
 
 import io.netty.buffer.ByteBuf;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
-import net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket;
-import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
-import net.minecraft.util.Identifier;
-
-import java.util.function.Supplier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
+import net.minecraft.resources.Identifier;
 
 public final class NetworkUtil {
     private NetworkUtil() {
@@ -19,19 +16,19 @@ public final class NetworkUtil {
 
     public static Identifier getChannelOrNull(Packet<?> packet) {
         return switch (packet) {
-            case CustomPayloadS2CPacket pkt -> pkt.payload().getId().id();
-            case CustomPayloadC2SPacket pkt -> pkt.payload().getId().id();
-            case LoginQueryRequestS2CPacket pkt -> pkt.payload().id();
+            case ClientboundCustomPayloadPacket pkt -> pkt.payload().type().id();
+            case ServerboundCustomPayloadPacket pkt -> pkt.payload().type().id();
+            case ClientboundCustomQueryPacket pkt -> pkt.payload().id();
             case null, default -> null;
         };
     }
 
     public static Object unwrapCustom(Packet<?> packet) {
         return switch (packet) {
-            case CustomPayloadS2CPacket pkt -> pkt.payload();
-            case CustomPayloadC2SPacket pkt -> pkt.payload();
-            case LoginQueryRequestS2CPacket pkt -> pkt.payload();
-            case LoginQueryResponseC2SPacket pkt when pkt.response() != null -> pkt.response();
+            case ClientboundCustomPayloadPacket pkt -> pkt.payload();
+            case ServerboundCustomPayloadPacket pkt -> pkt.payload();
+            case ClientboundCustomQueryPacket pkt -> pkt.payload();
+            case ServerboundCustomQueryAnswerPacket pkt when pkt.payload() != null -> pkt.payload();
             case null, default -> null;
         };
     }
@@ -46,7 +43,7 @@ public final class NetworkUtil {
         };
     }
 
-    public static InfallibleClosable writeByteLength(PacketByteBuf buf) {
+    public static InfallibleClosable writeByteLength(FriendlyByteBuf buf) {
         int idIdx = buf.writerIndex();
         buf.writeInt(0);
         int startIdx = buf.writerIndex();

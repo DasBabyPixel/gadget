@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.resource;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.gui.GuiUtil;
@@ -11,20 +12,12 @@ import io.wispforest.gadget.decompile.QuiltflowerManager;
 import io.wispforest.gadget.early.GadgetMixinExtension;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
-import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -34,13 +27,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ForkJoinPool;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
     private final Screen parent;
     private final boolean showAll;
     private ProgressToast toast;
     private ScrollContainer<FlowLayout> contentsScroll;
-    private final FlowLayout contents = Containers.verticalFlow(Sizing.content(), Sizing.content());
+    private final FlowLayout contents = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
     private final QuiltflowerHandler decompiler;
     private String currentFileName = null;
     private String currentFileContents = null;
@@ -51,12 +50,12 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
         this.showAll = showAll;
         this.toast = toast;
 
-        toast.step(Text.translatable("message.gadget.progress.loading_quiltflower"));
+        toast.step(Component.translatable("message.gadget.progress.loading_quiltflower"));
         decompiler = QuiltflowerManager.loadHandler(toast, text -> {
-            assert client != null;
+            assert minecraft != null;
 
-            client.execute(() -> {
-                var label = Components.label(text);
+            minecraft.execute(() -> {
+                var label = UIComponents.label(text);
                 contents.child(new LayoutCacheWrapper<>(label));
                 contentsScroll.scrollTo(label);
             });
@@ -64,16 +63,16 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     public static void openWithProgress(Screen parent) {
-        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_classes"));
-        MinecraftClient client = MinecraftClient.getInstance();
-        boolean showAll = InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT);
+        ProgressToast toast = ProgressToast.create(Component.translatable("message.gadget.loading_classes"));
+        Minecraft client = Minecraft.getInstance();
+        boolean showAll = InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT);
 
         toast.follow(
             QuiltflowerManager.ensureInstalled(toast)
                 .thenApplyAsync(unused -> {
                     ViewClassesScreen screen = new ViewClassesScreen(parent, showAll, toast);
 
-                    screen.init(client, parent.width, parent.height);
+                    screen.init(parent.width, parent.height);
                     screen.toast = null;
 
                     return screen;
@@ -84,7 +83,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
 
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::horizontalFlow);
+        return OwoUIAdapter.create(this, UIContainers::horizontalFlow);
     }
 
     @Override
@@ -93,10 +92,10 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT)
             .padding(Insets.of(5));
 
-        FlowLayout tree = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        ScrollContainer<FlowLayout> treeScroll = Containers.verticalScroll(Sizing.fill(25), Sizing.fill(100), tree)
+        FlowLayout tree = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
+        ScrollContainer<FlowLayout> treeScroll = UIContainers.verticalScroll(Sizing.fill(25), Sizing.fill(100), tree)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
-        contentsScroll = Containers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
+        contentsScroll = UIContainers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         rootComponent
@@ -104,7 +103,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
                 .margins(Insets.right(3)))
             .child(contentsScroll);
 
-        toast.step(Text.translatable("message.gadget.progress.building_screen"));
+        toast.step(Component.translatable("message.gadget.progress.building_screen"));
         TreeEntry root = new TreeEntry("", tree);
 
         Set<String> allClasses;
@@ -134,12 +133,12 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
 
             parent.container.child(makeRecipeRow(split[split.length - 1], fullPath));
         }
-        toast.step(Text.literal(""));
+        toast.step(Component.literal(""));
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (input.key() == GLFW.GLFW_KEY_S && input.hasCtrl()) {
+    public boolean keyPressed(KeyEvent input) {
+        if (input.key() == GLFW.GLFW_KEY_S && input.hasControlDown()) {
             if (currentFileContents == null) return false;
 
             String path = DialogUtil.saveFileDialog(
@@ -164,8 +163,8 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     private FlowLayout makeRecipeRow(String name, String fullPath) {
-        var row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
-        var fileLabel = Components.label(Text.literal(name));
+        var row = UIContainers.horizontalFlow(Sizing.content(), Sizing.content());
+        var fileLabel = UIComponents.label(Component.literal(name));
 
         row.child(fileLabel);
         row.mouseEnter().subscribe(
@@ -189,7 +188,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
                                     .replace('/', '.')))
                         );
 
-                        client.execute(() -> {
+                        minecraft.execute(() -> {
                             currentFileName = fullPath.substring(fullPath.lastIndexOf('/') + 1);
                             currentFileContents = text;
 
@@ -201,7 +200,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
                             contentsScroll.scrollTo(contents);
                         });
                     } catch (Exception e) {
-                        client.execute(() -> {
+                        minecraft.execute(() -> {
                             contents.configure(unused -> {
                                 contents.clearChildren();
                                 contents.child(GuiUtil.showException(e));
@@ -214,7 +213,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
                 String filename = fullPath.substring(fullPath.lastIndexOf('/') + 1);
 
                 GuiUtil.contextMenu(row, click.x(), click.y())
-                    .button(Text.translatable("text.gadget.save_as_java"), unused -> {
+                    .button(Component.translatable("text.gadget.save_as_java"), unused -> {
                         String path = DialogUtil.saveFileDialog(
                             "Save as .java",
                             filename.replace(".class", ".java"),
@@ -230,7 +229,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
                             }
                         }
                     })
-                    .button(Text.translatable("text.gadget.save_as_class"), unused -> {
+                    .button(Component.translatable("text.gadget.save_as_class"), unused -> {
                         String path = DialogUtil.saveFileDialog(
                             "Save as .class",
                             filename,
@@ -260,8 +259,8 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     @Override
-    public void close() {
-        client.setScreen(parent);
+    public void onClose() {
+        minecraft.setScreen(parent);
     }
 
     private static class TreeEntry {
@@ -282,13 +281,13 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
             SubObjectContainer sub = new SubObjectContainer(unused -> {
             }, unused -> {
             });
-            FlowLayout entryContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
-            FlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+            FlowLayout entryContainer = UIContainers.verticalFlow(Sizing.content(), Sizing.content());
+            FlowLayout row = UIContainers.horizontalFlow(Sizing.content(), Sizing.content());
 
             container
                 .child(entryContainer
                     .child(row
-                        .child(Components.label(Text.literal(name)))
+                        .child(UIComponents.label(Component.literal(name)))
                         .child(sub.getSpinnyBoi()
                             .margins(Insets.left(3))))
                     .child(sub));

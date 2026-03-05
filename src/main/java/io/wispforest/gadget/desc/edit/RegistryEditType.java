@@ -1,7 +1,7 @@
 package io.wispforest.gadget.desc.edit;
 
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 
 public class RegistryEditType<T> implements PrimitiveEditType<T> {
     private final Registry<T> registry;
@@ -16,11 +16,11 @@ public class RegistryEditType<T> implements PrimitiveEditType<T> {
 
         if (id == null) return null;
 
-        return registry.get(id);
+        return registry.getValue(id);
     }
 
     @Override
     public String toPacket(T value) {
-        return registry.getId(value).toString();
+        return registry.getKey(value).toString();
     }
 }

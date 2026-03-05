@@ -4,19 +4,18 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import io.wispforest.endec.Endec;
 import io.wispforest.gadget.util.ReflectionUtil;
-import net.minecraft.block.Block;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public final class PrimitiveEditTypes {
     private static final BiMap<String, PrimitiveEditType<?>> REGISTRY = HashBiMap.create();
@@ -38,7 +37,7 @@ public final class PrimitiveEditTypes {
     }
 
     public static <T> void registerForRegistry(Class<T> klass, Registry<T> registry) {
-        register(registry.getKey().getValue().toString(), klass, new RegistryEditType<>(registry));
+        register(registry.key().identifier().toString(), klass, new RegistryEditType<>(registry));
     }
 
     @SuppressWarnings("unchecked")
@@ -54,13 +53,13 @@ public final class PrimitiveEditTypes {
         registerSimple("float", Float.class, Float::parseFloat, Object::toString);
         registerSimple("double", Double.class, Double::parseDouble, Object::toString);
         registerSimple("string", String.class, x -> x, String::toString);
-        registerSimple("identifier", Identifier.class, Identifier::of, Identifier::toString);
+        registerSimple("identifier", Identifier.class, Identifier::parse, Identifier::toString);
         registerSimple("uuid", UUID.class, UUID::fromString, UUID::toString);
 
-        registerForRegistry(Block.class, Registries.BLOCK);
-        registerForRegistry(Item.class, Registries.ITEM);
-        registerForRegistry((Class<EntityType<?>>)(Class<?>) EntityType.class, Registries.ENTITY_TYPE);
-        registerForRegistry((Class<BlockEntityType<?>>)(Class<?>) BlockEntityType.class, Registries.BLOCK_ENTITY_TYPE);
-        registerForRegistry(StatusEffect.class, Registries.STATUS_EFFECT);
+        registerForRegistry(Block.class, BuiltInRegistries.BLOCK);
+        registerForRegistry(Item.class, BuiltInRegistries.ITEM);
+        registerForRegistry((Class<EntityType<?>>)(Class<?>) EntityType.class, BuiltInRegistries.ENTITY_TYPE);
+        registerForRegistry((Class<BlockEntityType<?>>)(Class<?>) BlockEntityType.class, BuiltInRegistries.BLOCK_ENTITY_TYPE);
+        registerForRegistry(MobEffect.class, BuiltInRegistries.MOB_EFFECT);
     }
 }

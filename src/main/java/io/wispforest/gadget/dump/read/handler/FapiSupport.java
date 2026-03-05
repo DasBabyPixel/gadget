@@ -2,19 +2,17 @@ package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.util.ErrorSink;
-import io.wispforest.gadget.util.NetworkUtil;
+import java.util.Arrays;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import net.fabricmc.fabric.impl.networking.CommonRegisterPayload;
 import net.fabricmc.fabric.impl.networking.CommonVersionPayload;
 import net.fabricmc.fabric.impl.networking.RegistrationPayload;
 import net.fabricmc.fabric.impl.recipe.ingredient.CustomIngredientPayloadC2S;
 import net.fabricmc.fabric.impl.recipe.ingredient.CustomIngredientPayloadS2C;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-
-import java.util.Arrays;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class FapiSupport {
@@ -56,78 +54,78 @@ public final class FapiSupport {
 
     public record MinecraftRegisterPacket(RegistrationPayload payload) implements LinesUnwrappedPacket {
         @Override
-        public void render(Consumer<Text> out, ErrorSink errSink) {
-            Text header = !(payload.id() == RegistrationPayload.UNREGISTER)
-                ? Text.literal("+ ")
-                .formatted(Formatting.GREEN)
-                : Text.literal("- ")
-                .formatted(Formatting.RED);
+        public void render(Consumer<Component> out, ErrorSink errSink) {
+            Component header = !(payload.id() == RegistrationPayload.UNREGISTER)
+                ? Component.literal("+ ")
+                .withStyle(ChatFormatting.GREEN)
+                : Component.literal("- ")
+                .withStyle(ChatFormatting.RED);
 
             for (Identifier channel : payload.channels()) {
                 out.accept(
-                    Text.literal("")
+                    Component.literal("")
                         .append(header)
-                        .append(Text.literal(channel.toString())
-                            .formatted(Formatting.GRAY)));
+                        .append(Component.literal(channel.toString())
+                            .withStyle(ChatFormatting.GRAY)));
             }
         }
     }
 
     public record CommonVersionPacket(CommonVersionPayload payload) implements LinesUnwrappedPacket {
         @Override
-        public void render(Consumer<Text> out, ErrorSink errSink) {
+        public void render(Consumer<Component> out, ErrorSink errSink) {
             out.accept(
-                Text.literal("versions")
-                    .append(Text.literal(" = " + Arrays.stream(payload.versions())
+                Component.literal("versions")
+                    .append(Component.literal(" = " + Arrays.stream(payload.versions())
                             .mapToObj(Integer::toString)
                             .collect(Collectors.joining(", ")))
-                        .formatted(Formatting.GRAY)));
+                        .withStyle(ChatFormatting.GRAY)));
         }
     }
 
     public record CommonRegisterPacket(CommonRegisterPayload payload) implements LinesUnwrappedPacket {
         @Override
-        public void render(Consumer<Text> out, ErrorSink errSink) {
-            out.accept(Text.literal("version")
-                .append(Text.literal(" = " + payload.version())
-                    .formatted(Formatting.GRAY)));
+        public void render(Consumer<Component> out, ErrorSink errSink) {
+            out.accept(Component.literal("version")
+                .append(Component.literal(" = " + payload.version())
+                    .withStyle(ChatFormatting.GRAY)));
 
-            out.accept(Text.literal("phase")
-                .append(Text.literal(" = " + payload.phase())
-                    .formatted(Formatting.GRAY)));
+            out.accept(Component.literal("phase")
+                .append(Component.literal(" = " + payload.phase())
+                    .withStyle(ChatFormatting.GRAY)));
 
             for (Identifier channel : payload.channels()) {
                 out.accept(
-                    Text.literal("+ ")
-                        .formatted(Formatting.GREEN)
-                        .append(Text.literal(channel.toString())
-                            .formatted(Formatting.GRAY)));
+                    Component.literal("+ ")
+                        .withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal(channel.toString())
+                            .withStyle(ChatFormatting.GRAY)));
             }
         }
     }
 
     public record CustomIngredientS2CPacket(CustomIngredientPayloadS2C payload) implements LinesUnwrappedPacket {
         @Override
-        public void render(Consumer<Text> out, ErrorSink errSink) {
-            out.accept(Text.literal("protocolVersion")
-                .append(Text.literal(" = " + payload.protocolVersion())
-                    .formatted(Formatting.GRAY)));
+        public void render(Consumer<Component> out, ErrorSink errSink) {
+            out.accept(Component.literal("protocolVersion")
+                .append(Component.literal(" = " + payload.protocolVersion())
+                    .withStyle(ChatFormatting.GRAY)));
         }
     }
 
     public record CustomIngredientC2SPacket(CustomIngredientPayloadC2S payload) implements LinesUnwrappedPacket {
         @Override
-        public void render(Consumer<Text> out, ErrorSink errSink) {
-            out.accept(Text.literal("protocolVersion")
-                .append(Text.literal(" = " + payload.protocolVersion())
-                    .formatted(Formatting.GRAY)));
+        public void render(Consumer<Component> out, ErrorSink errSink) {
+            out.accept(Component.literal("protocolVersion")
+                .append(Component.literal(" = " + payload.protocolVersion())
+                    .withStyle(ChatFormatting.GRAY)));
 
             for (Identifier serializer : payload.registeredSerializers()) {
                 out.accept(
-                    Text.literal("+ ")
-                        .formatted(Formatting.GREEN)
-                        .append(Text.literal(serializer.toString())
-                            .formatted(Formatting.GRAY)));
+                    Component.literal("+ ")
+                        .withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal(serializer.toString())
+                            .withStyle(ChatFormatting.GRAY)));
             }
         }
     }

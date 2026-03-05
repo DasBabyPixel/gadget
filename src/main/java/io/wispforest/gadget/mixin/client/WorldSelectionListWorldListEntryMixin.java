@@ -3,11 +3,10 @@ package io.wispforest.gadget.mixin.client;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.dump.DumpPrimer;
 import io.wispforest.gadget.client.gui.ContextMenuScreens;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.gui.screen.world.WorldListWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,21 +15,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(WorldListWidget.WorldEntry.class)
-public abstract class WorldListWidgetWorldEntryMixin {
+@Mixin(WorldSelectionList.WorldListEntry.class)
+public abstract class WorldSelectionListWorldListEntryMixin {
     @Shadow @Final private Screen screen;
 
-    @Shadow public abstract void play();
+    @Shadow public abstract void joinWorld();
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void onRightClick(Click click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
-        if (click.button() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
+    private void onRightClick(MouseButtonEvent event, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
+        if (event.button() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
         if (!Gadget.CONFIG.rightClickDump()) return;
 
-        ContextMenuScreens.contextMenuAt(screen, click.x(), click.y())
-                .button(Text.translatable("text.gadget.join_with_dump"), dropdown2 -> {
+        ContextMenuScreens.contextMenuAt(screen, event.x(), event.y())
+                .button(Component.translatable("text.gadget.join_with_dump"), dropdown2 -> {
                     DumpPrimer.isPrimed = true;
-                    play();
+                    joinWorld();
                 });
 
         cir.setReturnValue(true);

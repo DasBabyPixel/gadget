@@ -26,8 +26,7 @@ import io.wispforest.gadget.util.ProgressToast;
 import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
-import net.minecraft.text.Text;
-
+import net.minecraft.network.chat.Component;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +39,7 @@ public abstract class LoadingMappings implements Mappings {
     private volatile Map<String, String> fieldIdToIntermediaryMap = Collections.emptyMap();
 
     public LoadingMappings() {
-        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_mappings"));
+        ProgressToast toast = ProgressToast.create(Component.translatable("message.gadget.loading_mappings"));
         toast.follow(CompletableFuture.runAsync(() -> {
             MappingTree tree = new MemoryMappingTree();
             load(toast, (MappingVisitor) tree);
