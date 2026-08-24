@@ -123,7 +123,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
         }
 
         for (var name : allClasses) {
-            String fullPath = decompiler.mapClass(name.replace('.', '/')) + ".class";
+            String fullPath = name.replace('.', '/') + ".class";
             String[] split = fullPath.split("/");
             TreeEntry parent = root;
 
@@ -181,11 +181,9 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
 
                 ForkJoinPool.commonPool().execute(() -> {
                     try {
-                        var text = decompiler.decompileClass(Class.forName(
-                            decompiler.unmapClass(
-                                fullPath
-                                    .replace(".class", "")
-                                    .replace('/', '.')))
+                        var text = decompiler.decompileClass(Class.forName(fullPath
+                                .replace(".class", "")
+                                .replace('/', '.'))
                         );
 
                         minecraft.execute(() -> {
