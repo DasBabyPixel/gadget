@@ -49,7 +49,7 @@ public class NotificationToast implements Toast {
             return;
         }
 
-        client.getToastManager().addToast(this);
+        client.gui.toastManager().addToast(this);
     }
 
     @Override
