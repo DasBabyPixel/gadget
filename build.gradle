@@ -103,6 +103,17 @@ processResources {
     }
 }
 
+def writeVersionFile = tasks.register("writeVersionFile") {
+    def file = new File(it.temporaryDir, "VERSION")
+    it.outputs.file(file)
+    def ver = version
+    it.inputs.property("version", ver)
+    it.doLast {
+        file.write(ver)
+    }
+}
+tasks.assemble.dependsOn(writeVersionFile)
+
 tasks.withType(JavaCompile).configureEach {
     it.options.release = 25
 }
