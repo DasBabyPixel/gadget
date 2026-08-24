@@ -2,7 +2,6 @@ package io.wispforest.gadget.client;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ChatLogCommand;
-import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.config.GadgetConfigScreen;
 import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import io.wispforest.gadget.client.dump.handler.ClientPacketHandlers;
@@ -13,7 +12,6 @@ import io.wispforest.gadget.client.gui.GadgetScreen;
 import io.wispforest.gadget.client.log.ChatLogAppender;
 import io.wispforest.gadget.client.nbt.StackComponentDataScreen;
 import io.wispforest.gadget.client.resource.ViewResourcesScreen;
-import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.mixin.client.AbstractContainerScreenAccessor;
 import io.wispforest.gadget.network.BlockEntityTarget;
 import io.wispforest.gadget.network.EntityTarget;
@@ -21,7 +19,11 @@ import io.wispforest.gadget.network.GadgetNetworking;
 import io.wispforest.gadget.network.InspectionTarget;
 import io.wispforest.gadget.network.packet.c2s.OpenFieldDataScreenC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.RequestResourceC2SPacket;
-import io.wispforest.gadget.network.packet.s2c.*;
+import io.wispforest.gadget.network.packet.s2c.FieldDataErrorS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.FieldDataResponseS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.OpenFieldDataScreenS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.ResourceDataS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.ResourceListS2CPacket;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.UIContainers;
@@ -29,12 +31,10 @@ import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.layers.Layer;
 import io.wispforest.owo.ui.layers.Layers;
-import java.io.ByteArrayInputStream;
-import java.util.List;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -56,14 +56,17 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.ByteArrayInputStream;
+import java.util.List;
+
 public class GadgetClient implements ClientModInitializer {
     public static final KeyMapping INSPECT_KEY = new KeyMapping("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyMapping.Category.MISC);
     public static final KeyMapping DUMP_KEY = new KeyMapping("key.gadget.dump", GLFW.GLFW_KEY_K, KeyMapping.Category.MISC);
 
     @Override
     public void onInitializeClient() {
-        KeyBindingHelper.registerKeyBinding(INSPECT_KEY);
-        KeyBindingHelper.registerKeyBinding(DUMP_KEY);
+        KeyMappingHelper.registerKeyMapping(INSPECT_KEY);
+        KeyMappingHelper.registerKeyMapping(DUMP_KEY);
 
         ClientPacketHandlers.init();
         ServerData.init();
@@ -113,12 +116,6 @@ public class GadgetClient implements ClientModInitializer {
             screen.openFile(packet.id(), () -> new ByteArrayInputStream(packet.data()));
         });
 
-        ClientTickEvents.START_CLIENT_TICK.register(client -> {
-            if (client.getOverlay() == null) {
-                MappingsManager.init();
-            }
-        });
-
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (!INSPECT_KEY.consumeClick()) return;
 
@@ -148,7 +145,7 @@ public class GadgetClient implements ClientModInitializer {
 
             if (!GadgetNetworking.CHANNEL.canSendToServer()) {
                 if (target.resolve(client.level) == null) {
-                    client.player.displayClientMessage(Component.translatable("message.gadget.fail.notfound"), true);
+                    client.player.sendSystemMessage(Component.translatable("message.gadget.fail.notfound"));
                     return;
                 }
 
@@ -220,7 +217,6 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            ReloadMappingsCommand.register(dispatcher);
             ChatLogCommand.register(dispatcher);
         });
 

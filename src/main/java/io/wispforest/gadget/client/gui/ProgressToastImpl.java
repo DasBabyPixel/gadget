@@ -6,14 +6,22 @@ import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.UIContainers;
-import io.wispforest.owo.ui.core.*;
-import java.util.function.LongSupplier;
+import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.HorizontalAlignment;
+import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
+import io.wispforest.owo.ui.core.Positioning;
+import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.Surface;
+import io.wispforest.owo.ui.core.VerticalAlignment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.network.chat.Component;
+
+import java.util.function.LongSupplier;
 
 public class ProgressToastImpl implements Toast, ProgressToast {
     private OwoUIAdapter<FlowLayout> adapter;
@@ -56,7 +64,7 @@ public class ProgressToastImpl implements Toast, ProgressToast {
     }
 
     @Override
-    public void render(GuiGraphics ctx, Font textRenderer, long startTime) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long fullyVisibleForMs) {
         long value = following == null ? -1 : following.getAsLong();
 
         if (value < 0) {
@@ -66,7 +74,7 @@ public class ProgressToastImpl implements Toast, ProgressToast {
             progressBox.horizontalSizing(Sizing.fixed((int) (value * 140 / followingTotal)));
         }
 
-        this.adapter.render(ctx, 0, 0, client.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+        this.adapter.extractRenderState(graphics, 0, 0, client.getDeltaTracker().getGameTimeDeltaPartialTick(false));
     }
 
     @Override
