@@ -26,7 +26,7 @@ public class REISupport {
 
             if (!REIRuntime.getInstance().isOverlayVisible()) return;
             if (overlay.isEmpty()) return;
-            if (screen != Minecraft.getInstance().screen) return;
+            if (screen != Minecraft.getInstance().gui.screen()) return;
 
             boolean succeeded = false;
             for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(screen)) {
