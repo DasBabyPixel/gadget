@@ -2,17 +2,18 @@ package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.util.ErrorSink;
-import java.util.Arrays;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import net.fabricmc.fabric.impl.networking.CommonRegisterPayload;
 import net.fabricmc.fabric.impl.networking.CommonVersionPayload;
 import net.fabricmc.fabric.impl.networking.RegistrationPayload;
-import net.fabricmc.fabric.impl.recipe.ingredient.CustomIngredientPayloadC2S;
-import net.fabricmc.fabric.impl.recipe.ingredient.CustomIngredientPayloadS2C;
+import net.fabricmc.fabric.impl.recipe.ingredient.ClientboundCustomIngredientPayload;
+import net.fabricmc.fabric.impl.recipe.ingredient.ServerboundCustomIngredientPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+
+import java.util.Arrays;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class FapiSupport {
@@ -40,13 +41,13 @@ public final class FapiSupport {
         });
 
         PacketUnwrapper.EVENT.register((packet, errSink) -> {
-            if (!(packet.customPayload() instanceof CustomIngredientPayloadS2C payload)) return null;
+            if (!(packet.customPayload() instanceof ClientboundCustomIngredientPayload payload)) return null;
 
             return new CustomIngredientS2CPacket(payload);
         });
 
         PacketUnwrapper.EVENT.register((packet, errSink) -> {
-            if (!(packet.customPayload() instanceof CustomIngredientPayloadC2S payload)) return null;
+            if (!(packet.customPayload() instanceof ServerboundCustomIngredientPayload payload)) return null;
 
             return new CustomIngredientC2SPacket(payload);
         });
@@ -55,7 +56,7 @@ public final class FapiSupport {
     public record MinecraftRegisterPacket(RegistrationPayload payload) implements LinesUnwrappedPacket {
         @Override
         public void render(Consumer<Component> out, ErrorSink errSink) {
-            Component header = !(payload.id() == RegistrationPayload.UNREGISTER)
+            Component header = !(payload.type() == RegistrationPayload.UNREGISTER)
                 ? Component.literal("+ ")
                 .withStyle(ChatFormatting.GREEN)
                 : Component.literal("- ")
@@ -90,8 +91,8 @@ public final class FapiSupport {
                 .append(Component.literal(" = " + payload.version())
                     .withStyle(ChatFormatting.GRAY)));
 
-            out.accept(Component.literal("phase")
-                .append(Component.literal(" = " + payload.phase())
+            out.accept(Component.literal("protocol")
+                .append(Component.literal(" = " + payload.protocol())
                     .withStyle(ChatFormatting.GRAY)));
 
             for (Identifier channel : payload.channels()) {
@@ -104,7 +105,7 @@ public final class FapiSupport {
         }
     }
 
-    public record CustomIngredientS2CPacket(CustomIngredientPayloadS2C payload) implements LinesUnwrappedPacket {
+    public record CustomIngredientS2CPacket(ClientboundCustomIngredientPayload payload) implements LinesUnwrappedPacket {
         @Override
         public void render(Consumer<Component> out, ErrorSink errSink) {
             out.accept(Component.literal("protocolVersion")
@@ -113,7 +114,7 @@ public final class FapiSupport {
         }
     }
 
-    public record CustomIngredientC2SPacket(CustomIngredientPayloadC2S payload) implements LinesUnwrappedPacket {
+    public record CustomIngredientC2SPacket(ServerboundCustomIngredientPayload payload) implements LinesUnwrappedPacket {
         @Override
         public void render(Consumer<Component> out, ErrorSink errSink) {
             out.accept(Component.literal("protocolVersion")

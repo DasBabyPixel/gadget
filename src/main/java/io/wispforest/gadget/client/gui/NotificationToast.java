@@ -3,10 +3,14 @@ package io.wispforest.gadget.client.gui;
 import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.UIContainers;
-import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.core.HorizontalAlignment;
+import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
+import io.wispforest.owo.ui.core.Surface;
+import io.wispforest.owo.ui.core.VerticalAlignment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.network.chat.Component;
@@ -49,8 +53,8 @@ public class NotificationToast implements Toast {
     }
 
     @Override
-    public void render(GuiGraphics ctx, Font textRenderer, long startTime) {
-        this.adapter.render(ctx, 0, 0, client.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+    public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long fullyVisibleForMs) {
+        this.adapter.extractRenderState(graphics, 0, 0, client.getDeltaTracker().getGameTimeDeltaPartialTick(false));
     }
 
     @Override

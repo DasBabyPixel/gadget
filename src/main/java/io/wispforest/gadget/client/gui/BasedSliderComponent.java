@@ -5,14 +5,15 @@ import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 public class BasedSliderComponent extends SliderComponent {
     private Function<Double, Component> tooltipFactory;
@@ -27,25 +28,17 @@ public class BasedSliderComponent extends SliderComponent {
     }
 
     @Override
-    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         NinePatchTexture.draw(ButtonComponent.DISABLED_TEXTURE, (OwoUIGraphics) ctx, getX(), getY(), width, height);
 
-        NinePatchTexture.draw(
-            (isHovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE),
-            (OwoUIGraphics) ctx,
-            this.getX() + (int)(this.value * (double)(this.width - 8)),
-            getY(),
-            8,
-            20
-        );
+        NinePatchTexture.draw((isHovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE), (OwoUIGraphics) ctx, this.getX() + (int) (this.value * (double) (this.width - 8)), getY(), 8, 20);
 
         int textColor = this.active ? 16777215 : 10526880;
         int marginX = 2;
-        this.renderScrollingStringOverContents(
-                ctx.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE),
-                this.getMessage().copy().withColor(textColor),
-                marginX
-        );
+        extractScrollingStringOverContents(ctx.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE), this
+                .getMessage()
+                .copy()
+                .withColor(textColor), marginX);
     }
 
     @Override

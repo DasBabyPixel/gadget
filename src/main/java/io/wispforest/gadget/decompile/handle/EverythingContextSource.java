@@ -23,7 +23,7 @@ public class EverythingContextSource implements IContextSource {
     public Entries getEntries() {
         var klasses = new ArrayList<Entry>();
         for (var klass : handler.allUnmappedClasses()) {
-            klasses.add(Entry.parse(handler.mapClass(klass)));
+            klasses.add(Entry.parse(klass));
         }
 
         return new Entries(klasses, List.of(), List.of());

@@ -1,16 +1,17 @@
 package io.wispforest.gadget.util;
 
 import io.wispforest.gadget.decompile.QuiltflowerVersions;
-import io.wispforest.gadget.mappings.*;
-import io.wispforest.owo.config.annotation.*;
-import net.fabricmc.loader.api.FabricLoader;
+import io.wispforest.owo.config.annotation.Config;
+import io.wispforest.owo.config.annotation.Hook;
+import io.wispforest.owo.config.annotation.Nest;
+import io.wispforest.owo.config.annotation.PredicateConstraint;
+import io.wispforest.owo.config.annotation.RestartRequired;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 @Config(name = "gadget", wrapperName = "GadgetConfig")
 public class GadgetConfigModel {
@@ -22,8 +23,6 @@ public class GadgetConfigModel {
     public boolean matrixStackDebugging = true;
     @RestartRequired public boolean silenceStartupErrors = true;
     @PredicateConstraint("isQuiltflowerVersionValid") public String quiltflowerVersion = "LATEST";
-    @PredicateConstraint("isMappingsValid") @Hook public MappingsType mappings =
-        FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
     public boolean inspectClasses = true;
     public boolean fullDecompilationContext = true;
     @Hook public List<String> hiddenFields = new ArrayList<>(List.of(
@@ -81,33 +80,10 @@ public class GadgetConfigModel {
         }
     }
 
-    public static boolean isMappingsValid(MappingsType type) {
-        return type != MappingsType.LOCAL
-            || FabricLoader.getInstance().getMappingResolver().getCurrentRuntimeNamespace().equals("named");
-    }
-
     public static class InternalSettings {
         public boolean debugMatrixStackDebugging = false;
         public boolean dumpTRMappings = false;
         public boolean dumpFieldDataRequests = false;
-    }
-
-    public enum MappingsType {
-        // TODO: finish everything™
-        LOCAL(() -> LocalMappings.INSTANCE),
-        YARN(YarnMappings::new),
-        MOJANG(MojangMappings::new),
-        QUILT(QuiltMappings::new);
-
-        private final Supplier<Mappings> factory;
-
-        MappingsType(Supplier<Mappings> factory) {
-            this.factory = factory;
-        }
-
-        public Supplier<Mappings> factory() {
-            return factory;
-        }
     }
 
     public enum DumpSafetyMode {
