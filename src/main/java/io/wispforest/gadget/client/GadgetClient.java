@@ -76,7 +76,7 @@ public class GadgetClient implements ClientModInitializer {
         ConfigScreenProviders.register("gadget", GadgetConfigScreen::new);
 
         GadgetNetworking.CHANNEL.registerClientbound(OpenFieldDataScreenS2CPacket.class, (packet, access) -> {
-            access.runtime().setScreen(new FieldDataScreen(
+            access.runtime().gui.setScreen(new FieldDataScreen(
                 packet.target(),
                 false,
                 true, packet.rootData(),
@@ -85,7 +85,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(FieldDataResponseS2CPacket.class, (packet, access) -> {
-            if (access.runtime().screen instanceof FieldDataScreen gui
+            if (access.runtime().gui.screen() instanceof FieldDataScreen gui
                 && gui.target().equals(packet.target())
                 && gui.dataSource() instanceof RemoteFieldDataSource remote) {
                 remote.acceptPacket(packet);
@@ -93,7 +93,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(FieldDataErrorS2CPacket.class, (packet, access) -> {
-            if (access.runtime().screen instanceof FieldDataScreen gui
+            if (access.runtime().gui.screen() instanceof FieldDataScreen gui
                 && gui.target().equals(packet.target())
                 && gui.dataSource() instanceof RemoteFieldDataSource remote) {
                 remote.acceptPacket(packet);
@@ -101,16 +101,16 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(ResourceListS2CPacket.class, (packet, access) -> {
-            var screen = new ViewResourcesScreen(access.runtime().screen, packet.resources());
+            var screen = new ViewResourcesScreen(access.runtime().gui.screen(), packet.resources());
 
             screen.resRequester(
                 (id, idx) -> GadgetNetworking.CHANNEL.clientHandle().send(new RequestResourceC2SPacket(id, idx)));
 
-            access.runtime().setScreen(screen);
+            access.runtime().gui.setScreen(screen);
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(ResourceDataS2CPacket.class, (packet, access) -> {
-            if (!(access.runtime().screen instanceof ViewResourcesScreen screen))
+            if (!(access.runtime().gui.screen() instanceof ViewResourcesScreen screen))
                 return;
 
             screen.openFile(packet.id(), () -> new ByteArrayInputStream(packet.data()));
@@ -149,7 +149,7 @@ public class GadgetClient implements ClientModInitializer {
                     return;
                 }
 
-                client.setScreen(new FieldDataScreen(
+                client.gui.setScreen(new FieldDataScreen(
                     target,
                     true,
                     false,
@@ -183,7 +183,7 @@ public class GadgetClient implements ClientModInitializer {
             instance.adapter.rootComponent.child(
                     UIComponents.button(
                     Component.translatable("text.gadget.menu_button"),
-                    button -> Minecraft.getInstance().setScreen(new GadgetScreen(instance.screen))
+                    button -> Minecraft.getInstance().gui.setScreen(new GadgetScreen(instance.screen))
                 ).<Button>configure(button -> {
                     button.margins(Insets.left(4)).sizing(Sizing.fixed(20));
                     instance.alignComponentToWidget(widget -> {
@@ -210,7 +210,7 @@ public class GadgetClient implements ClientModInitializer {
                     if (slot instanceof CreativeModeInventoryScreen.CustomCreativeSlot) return true;
                     if (slot.getItem().isEmpty()) return true;
 
-                    client.setScreen(new StackComponentDataScreen(handled, slot));
+                    client.gui.setScreen(new StackComponentDataScreen(handled, slot));
 
                     return false;
                 });
