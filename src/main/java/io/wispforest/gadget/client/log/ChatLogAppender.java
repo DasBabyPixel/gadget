@@ -90,7 +90,7 @@ public class ChatLogAppender extends AbstractAppender {
 
         client.execute(() -> {
             if (client.player == null) return;
-            ((ChatComponentAccessor) client.getChatListener())
+            ((ChatComponentAccessor) client.gui.chatListener())
                 .callAddMessage(
                     text, null, GuiMessageSource.SYSTEM_CLIENT,
                         MESSAGE_TAG
