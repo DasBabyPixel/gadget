@@ -7,8 +7,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.chat.GuiMessageSource;
+import net.minecraft.client.multiplayer.chat.GuiMessageTag;
 import net.minecraft.network.chat.Component;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Layout;
@@ -89,11 +90,9 @@ public class ChatLogAppender extends AbstractAppender {
 
         client.execute(() -> {
             if (client.player == null) return;
-
-            ((ChatComponentAccessor) client.gui.getChat())
+            ((ChatComponentAccessor) client.getChatListener())
                 .callAddMessage(
-                    text,
-                    null,
+                    text, null, GuiMessageSource.SYSTEM_CLIENT,
                         MESSAGE_TAG
                 );
         });

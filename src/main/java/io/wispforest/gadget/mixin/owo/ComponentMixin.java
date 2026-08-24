@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = UIComponent.class, remap = false)
+@Mixin(value = UIComponent.class)
 public interface ComponentMixin {
     @Shadow @Nullable ParentUIComponent parent();
 
